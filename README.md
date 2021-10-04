@@ -12,4 +12,4 @@ Los pasos a seguir para subir el código a GitHub y hacer un *merge* con main so
 1. Hacer un pull de la [rama main](https://github.com/JuanDavidRamirezGiron/ajedrez-magico/tree/main) o crearla partiendo de ella
 2. Desarrollar en la nueva rama creada
 3. Hacer *push* de la rama para subirla a GitHub
-4. Pedir un *merge request* para que el admin lo valide 
+4. Pedir un *merge request* para que el admin lo valide
