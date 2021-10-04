@@ -13,6 +13,3 @@ Los pasos a seguir para subir el código a GitHub y hacer un *merge* con main so
 2. Desarrollar en la nueva rama creada
 3. Hacer *push* de la rama para subirla a GitHub
 4. Pedir un *merge request* para que el admin lo valide
-=======
-[Juan David Ramírez Girón](https://github.com/jdmac94)
-
