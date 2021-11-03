@@ -1,0 +1,2 @@
+C:/Users/cadyj/Google Drive/UAB/Año 4/Cuatri 1/VGI/Proyecto/Ajedrez/Libraries/include/glm/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/cadyj/Google Drive/UAB/Año 4/Cuatri 1/VGI/Proyecto/Ajedrez/Libraries/include/glm/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
