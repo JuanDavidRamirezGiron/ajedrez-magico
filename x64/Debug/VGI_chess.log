@@ -1,30 +1,19 @@
 ﻿  Camera.cpp
+C:\Users\Usuario\Desktop\4to Ingeniería Informática\VGI\AjedrezMágico\Camera.h(4,9): fatal error C1083: No se puede abrir el archivo incluir: 'glad/glad.h': No such file or directory
   main.cpp
+C:\Users\Usuario\Desktop\4to Ingeniería Informática\VGI\AjedrezMágico\Model.h(1,9): fatal error C1083: No se puede abrir el archivo incluir: 'json/json.h': No such file or directory
   Mesh.cpp
-C:\Users\aleja\Desktop\4o\VGI\chess_player\Mesh.cpp(54,63): warning C4267: 'argumento': conversión de 'size_t' a 'GLsizei'; posible pérdida de datos
+C:\Users\Usuario\Desktop\4to Ingeniería Informática\VGI\AjedrezMágico\VAO.h(5,9): fatal error C1083: No se puede abrir el archivo incluir: 'glad/glad.h': No such file or directory
   Model.cpp
+C:\Users\Usuario\Desktop\4to Ingeniería Informática\VGI\AjedrezMágico\Model.h(1,9): fatal error C1083: No se puede abrir el archivo incluir: 'json/json.h': No such file or directory
   shaderClass.cpp
+C:\Users\Usuario\Desktop\4to Ingeniería Informática\VGI\AjedrezMágico\shaderClass.h(4,9): fatal error C1083: No se puede abrir el archivo incluir: 'glad/glad.h': No such file or directory
   stb.cpp
+C:\Users\Usuario\Desktop\4to Ingeniería Informática\VGI\AjedrezMágico\stb.cpp(2,10): fatal error C1083: No se puede abrir el archivo incluir: 'stb/stb_image.h': No such file or directory
   Texture.cpp
+C:\Users\Usuario\Desktop\4to Ingeniería Informática\VGI\AjedrezMágico\Texture.h(5,9): fatal error C1083: No se puede abrir el archivo incluir: 'glad/glad.h': No such file or directory
   VAO.cpp
-C:\Users\aleja\Desktop\4o\VGI\chess_player\VAO.cpp(13,63): warning C4244: 'argumento': conversión de 'GLsizeiptr' a 'GLsizei'; posible pérdida de datos
+C:\Users\Usuario\Desktop\4to Ingeniería Informática\VGI\AjedrezMágico\VAO.h(5,9): fatal error C1083: No se puede abrir el archivo incluir: 'glad/glad.h': No such file or directory
   VBO.cpp
+C:\Users\Usuario\Desktop\4to Ingeniería Informática\VGI\AjedrezMágico\VBO.h(5,9): fatal error C1083: No se puede abrir el archivo incluir: 'glm/glm.hpp': No such file or directory
   Generando código...
-C:\Users\aleja\Desktop\4o\VGI\chess_player\Model.cpp(109): warning C4715: 'Model::loadModel': no todas las rutas de acceso de control devuelven un valor
-  glad.c
-glfw3.lib(context.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(context.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(init.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(init.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(input.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(input.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(monitor.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(monitor.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(vulkan.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(vulkan.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(window.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(window.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(win32_init.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(win32_init.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(win32_joystick.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(win32_joystick.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(win32_monitor.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(win32_monitor.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(win32_time.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(win32_time.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(win32_thread.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(win32_thread.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(win32_window.obj) : warning LNK4099: no se encontró PDB 'glfw3.pdb' con 'glfw3.lib(win32_window.obj)' o en 'C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\glfw3.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(wgl_context.obj) : warning LNK4099: no se encontró PDB '' con 'glfw3.lib(wgl_context.obj)' o en ''; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(egl_context.obj) : warning LNK4099: no se encontró PDB '' con 'glfw3.lib(egl_context.obj)' o en ''; se vinculará el objeto sin tener en cuenta información de depuración
-glfw3.lib(osmesa_context.obj) : warning LNK4099: no se encontró PDB '' con 'glfw3.lib(osmesa_context.obj)' o en ''; se vinculará el objeto sin tener en cuenta información de depuración
-  VGI_chess.vcxproj -> C:\Users\aleja\Desktop\4o\VGI\chess_player\x64\Debug\VGI_chess.exe
