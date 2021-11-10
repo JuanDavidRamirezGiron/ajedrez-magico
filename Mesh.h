@@ -23,7 +23,11 @@ public:
 	void Draw
 	(
 		Shader& shader,
-		Camera& camera
+		Camera& camera,
+		glm::vec3 translation,
+		GLfloat rdeg, 
+		glm::vec3 raxis,
+		glm::vec3 escalation
 	);
 };
 #endif

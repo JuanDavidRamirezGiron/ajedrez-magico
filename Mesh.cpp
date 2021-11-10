@@ -1,5 +1,4 @@
 #include "Mesh.h"
-
 Mesh::Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::vector <Texture>& textures)
 {
 	Mesh::vertices = vertices;
@@ -20,7 +19,7 @@ Mesh::Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::v
 }
 
 
-void Mesh::Draw( Shader& shader,Camera& camera)
+void Mesh::Draw( Shader& shader,Camera& camera, glm::vec3 translation, GLfloat rdeg, glm::vec3 raxis, glm::vec3 escalation)
 {
 	// Bind shader to be able to access uniforms
 	shader.Activate();
@@ -48,8 +47,19 @@ void Mesh::Draw( Shader& shader,Camera& camera)
 	// Take care of the camera Matrix
 	glUniform3f(glGetUniformLocation(shader.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 	camera.Matrix(shader, "camMatrix");
-	glm::mat4 matrix = glm::mat4(1.0f);
-	glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(matrix));
+	
+
+	//Translation matrix (glm::vec3(0.0f, 0.0f, 0.0f))
+	glm::mat4 myTranslationMatrix = glm::translate(glm::mat4(1.0f), translation);
+	//rotation matrix (deg, 
+	glm::mat4 myRotationMatrix = glm::rotate(glm::mat4(1.f), rdeg, raxis);
+	//escalstion matrix
+	glm::mat4 myScaleMatrix = glm::scale(glm::mat4(1.f), escalation);
+	//glm::mat4 myScaleMatrix = glm::scale(2.0f, 2.0f, 2.0f);
+	//combine matrices
+	glm::mat4 myModelMatrix = myTranslationMatrix * myRotationMatrix * myScaleMatrix;
+
+	glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(myModelMatrix));
 	// Draw the actual mesh
 	glDrawArrays(GL_TRIANGLES, 0, sizeof(GLfloat)*vertices.size());
 }

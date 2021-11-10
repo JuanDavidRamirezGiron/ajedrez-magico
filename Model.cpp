@@ -4,10 +4,10 @@ Model::Model(const char* filename){
 	loadModel(filename);
 }
 
-void Model::Draw(Shader& shader, Camera& camera){
+void Model::Draw(Shader& shader, Camera& camera, glm::vec3 translation, GLfloat rdeg, glm::vec3 raxis, glm::vec3 escalation){
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].Mesh::Draw(shader, camera);
+		meshes[i].Mesh::Draw(shader, camera, translation, rdeg, raxis, escalation);
 	}
 }
 
