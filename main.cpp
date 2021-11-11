@@ -1,4 +1,6 @@
-
+#include "FileReader.h"
+#include <Windows.h>
+#include <cstdio>
 #include"Model.h"
 
 //constantes medida ventana
@@ -19,6 +21,18 @@ GLuint indices[] =
 
 
 int main() {
+
+	SetConsoleOutputCP(CP_UTF8);
+	setvbuf(stdout, nullptr, _IOFBF, 1000);
+
+	cout << "Empieza la lectura del programa" << endl;
+
+	FileReader* reader = new FileReader("Mas jugadas.pgn");
+
+	string info;
+
+	info = reader->gatherInformation();
+
 	//inicializar GLFW
 	glfwInit();
 	Vertex vertices[] =
