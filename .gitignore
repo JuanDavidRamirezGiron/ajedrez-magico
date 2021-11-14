@@ -428,3 +428,19 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,c++
+.gitignore.bak
+glad.c
+VGI_chess.vcxproj
+VGI_chess.vcxproj.filters
+Libraries/include/glad/glad.h
+Libraries/include/GLFW/glfw3.h
+Libraries/include/GLFW/glfw3native.h
+Libraries/include/glm/CMakeLists.txt
+Libraries/include/glm/CMakeLists.txt.bak
+Libraries/include/glm/out/build/x64-Debug/build.ninja
+Libraries/include/glm/out/build/x64-Debug/CMakeCache.txt
+Libraries/include/glm/out/build/x64-Debug/.cmake/api/v1/reply/cache-v2-0ac76d6e740ee2ef81b6.json
+Libraries/include/glm/out/build/x64-Debug/.cmake/api/v1/reply/codemodel-v2-689bf9e04084113becf6.json
+Libraries/include/glm/out/build/x64-Debug/.cmake/api/v1/reply/index-2021-11-14T17-46-14-0383.json
+Libraries/include/glm/out/build/x64-Debug/CMakeFiles/rules.ninja
+Libraries/include/KHR/khrplatform.h
