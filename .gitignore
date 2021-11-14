@@ -431,3 +431,8 @@ FodyWeavers.xsd
 
 # Custom
 Libraries/*
+.gitignore.bak
+glad.c
+VGI_chess.sln
+VGI_chess.vcxproj
+VGI_chess.vcxproj.filters
