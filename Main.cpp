@@ -7,6 +7,8 @@
 const unsigned int width = 1280;
 const unsigned int height = 720;
 
+//Testing after cleaning gitignore
+
 
 
 
