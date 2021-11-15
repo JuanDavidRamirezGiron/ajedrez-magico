@@ -23,29 +23,66 @@ const unsigned int width = 1280;
 const unsigned int height = 720;
 
 
+void drawPieces(Shader shaderProgram, Camera camera, Model board, Model pawn, Model bishop, Model tower, Model horse, Model queen, Model king, std::vector<std::vector<int>> arraygame) {
 
-void drawPieces(Model board, Model pawn, Model bishop, Model tower, Model horse, Model queen, Model king, std::vector<std::vector<std::vector<int>>> arraygame) {
-	for (auto arraygameboard : arraygame) {
-		for (auto piece : arraygameboard) {
-			switch (piece[0])
-			{
-			case PAWN:
-				break;
-			case BISHOP:
-				break;
-			case TOWER:
-				break;
-			case HORSE:
-				break;
-			case QUEEN:
-				break;
-			case KING:
-				break;
-			default:
-				break;
-			}
+	const int originX = -9;
+	const int originZ = 10;
+	const int cellSize = 2;
+
+	//Dibujamos el tablero
+	glm::vec4 color = glm::vec4(0.8f, 0.3f, 0.02f, 1.0f);
+	glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
+	board.Draw(shaderProgram, camera, glm::vec3(0.0f, -3.2f, 0.0f), 1.5708f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f));
+	
+	//Iteramos en el vector de posiciones de piezas
+	for (auto piece : arraygame) {
+		//aqui codigo para pasar del vector a las posiciones
+		int pieceX = originX + piece[1] * cellSize;
+		int pieceZ = originZ - piece[2] * cellSize;
+		glm::vec3 pieceZoom = glm::vec3(0.3f, 0.3f, 0.3f);
+		//if pieza blanca??
+		glm::vec3 pieceRotation = glm::vec3(1.f, 0.f, 0.f);
+		glm::vec4 color;
+		
+		
+
+		switch (piece[0])
+		{
+		case PAWN:
+			color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
+			pawn.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			break;
+		case BISHOP:
+			color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
+			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
+			bishop.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			break;
+		case TOWER:
+			color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
+			tower.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			break;
+		case HORSE:
+			color = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
+			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
+			horse.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 00.f, pieceRotation, pieceZoom);
+			break;
+		case QUEEN:
+			color = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
+			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
+			queen.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			break;
+		case KING:
+			color = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
+			king.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			break;
+		default:
+			break;
 		}
 	}
+	
 }
 
 int main() {
@@ -54,13 +91,13 @@ int main() {
 	{
 		{TOWER, A, 1},{HORSE, B, 1},{BISHOP, C, 1},{QUEEN, D, 1},{KING, E, 1},{BISHOP, F, 1},{HORSE, G, 1},{TOWER, H, 1},
 		{PAWN, A, 2},{PAWN, B, 2},{PAWN, C, 2},{PAWN, D, 2},{PAWN, E, 2},{PAWN, F, 2},{PAWN, G, 2},{PAWN, H, 2},
-		{TOWER, A, 8},{HORSE, B, 8},{BISHOP, C, 8},{QUEEN, D, 8},{KING, E, 8},{BISHOP, F, 8},{HORSE, G, 8},{TOWER, H, 8},
+		{TOWER, A, 8},{HORSE, B, 8},{BISHOP, C, 8},{KING, D, 8},{QUEEN, E, 8},{BISHOP, F, 8},{HORSE, G, 8},{TOWER, H, 8},
 		{PAWN, A, 7},{PAWN, B, 7},{PAWN, C, 7},{PAWN, D, 7},{PAWN, E, 7},{PAWN, F, 7},{PAWN, G, 7},{PAWN, H, 7}
 	},
 	{
 		{TOWER, A, 1},{HORSE, B, 1},{BISHOP, C, 1},{QUEEN, D, 1},{KING, E, 1},{BISHOP, F, 1},{HORSE, G, 1},{TOWER, H, 1},
 		{PAWN, A, 2},{PAWN, B, 2},{PAWN, C, 3}, {PAWN, D, 2},{PAWN, E, 2},{PAWN, F, 2},{PAWN, G, 2},{PAWN, H, 2},
-		{TOWER, A, 8},{HORSE, B, 8},{BISHOP, C, 8},{QUEEN, D, 8},{KING, E, 8},{BISHOP, F, 8},{HORSE, G, 8},{TOWER, H, 8},
+		{TOWER, A, 8},{HORSE, B, 8},{BISHOP, C, 8},{KING, D, 8},{QUEEN, E, 8},{BISHOP, F, 8},{HORSE, G, 8},{TOWER, H, 8},
 		{PAWN, A, 7},{PAWN, B, 7},{PAWN, C, 7},{PAWN, D, 7},{PAWN, E, 7},{PAWN, F, 7},{PAWN, G, 7},{PAWN, H, 7}
 	} };
 
@@ -84,7 +121,7 @@ int main() {
 
 	//Ajustar el viewport a la ventana
 	glViewport(0, 0, width, height);
-
+	glEnable(GL_DEPTH_TEST);
 	//Importamos las texturas
 	Texture textures[]
 	{
@@ -117,7 +154,7 @@ int main() {
 		//Draw(shader, camara, vector translacion, angulo rotacion en radianes, vector ejes rotacion, vector escalado)
 		//board.Draw(shaderProgram, camera, glm::vec3(0.0f, -4.6f, 0.0f), 1.5708f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f));
 		//king.Draw(shaderProgram, camera, glm::vec3(0.0f, 0.0f, 0.0f), 0.f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f));
-		drawPieces(board, pawn, bishop, tower, horse, queen, king, arraygame);
+		drawPieces(shaderProgram, camera, board, pawn, bishop, tower, horse, queen, king, arraygame[1]);
 
 		//Intercambio de buffers
 		glfwSwapBuffers(window);
