@@ -1,8 +1,10 @@
 #include "FileReader.h"
 
-string FileReader::gatherInformation()
+map<int, pair<string, string>> FileReader::gatherInformation()
 {
-	string information;
+	//string information;
+
+	map<int, pair<string, string>> dict;
 	
 	vector<string> origin;
 	vector<string> destiny;
@@ -43,14 +45,14 @@ string FileReader::gatherInformation()
 
 		if (validatePlays(origin, destiny)) {
 			cout << "Jugadas validadas" << endl;
-			map<int, pair<string, string>> dict = createDictionary( origin, destiny);
+			dict = createDictionary(origin, destiny);
 			printDictionary(dict);
 		}
 
 		file.close();
 	} 
 	
-	return string();
+	return dict;
 }
 
 string FileReader::removeBrackets(string line)
@@ -127,7 +129,9 @@ void FileReader::getPlays(vector<string> &origin, vector<string> &destiny, strin
 	while ((pos = line.find(delimiter)) != string::npos) {
 
 		token = line.substr(0, pos);
-		cout << token << endl;
+		//cout << token << endl;
+		string test = token.erase(0, token.find(".") + 1);
+		//cout << "TETSING: " << test << endl;
 		if (j % 2 == 0 && token != "") {
 			origin.push_back(token);
 		}

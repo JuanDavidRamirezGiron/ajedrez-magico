@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 
+
 using namespace std;
 
 class FileReader {
@@ -23,7 +24,7 @@ public:
 		this->filename = filename;
 	}
 
-	string gatherInformation();
+	map<int, pair<string, string>> gatherInformation();
 	string removeBrackets(string line);
 	string reorderPlayerNames(string name);
 	

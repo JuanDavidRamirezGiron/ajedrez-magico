@@ -1,4 +1,3 @@
-#include<json/json.h>
 #include"Mesh.h"
 
 class Model {

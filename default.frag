@@ -8,7 +8,8 @@ in vec3 crntPos;
 // Imports the normal from the Vertex Shader
 in vec3 Normal;
 // Imports the color from the Vertex Shader
-in vec3 color;
+///////////
+//in vec3 color;
 // Imports the texture coordinates from the Vertex Shader
 in vec2 texCoord;
 
@@ -23,6 +24,8 @@ uniform vec4 lightColor;
 uniform vec3 lightPos;
 // Gets the position of the camera from the main function
 uniform vec3 camPos;
+
+uniform vec4 color;
 
 
 vec4 direcLight()
@@ -50,5 +53,5 @@ vec4 direcLight()
 void main()
 {
 	FragColor = direcLight();
-	FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0f);
+	FragColor = color;
 }
