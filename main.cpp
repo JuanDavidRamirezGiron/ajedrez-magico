@@ -16,6 +16,8 @@
 #define F 6
 #define G 7
 #define H 8
+#define WHITE true
+#define BLACK false
 
 
 //Constantes medida ventana
@@ -32,50 +34,40 @@ void drawPieces(Shader shaderProgram, Camera camera, Model board, Model pawn, Mo
 	//Dibujamos el tablero
 	glm::vec4 color = glm::vec4(0.8f, 0.3f, 0.02f, 1.0f);
 	glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
-	board.Draw(shaderProgram, camera, glm::vec3(0.0f, -3.2f, 0.0f), 1.5708f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f));
+	board.Draw(shaderProgram, camera, glm::vec3(0.0f, -1.9f, 0.0f), 1.5708f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f));
 	
 	//Iteramos en el vector de posiciones de piezas
 	for (auto piece : arraygame) {
 		//aqui codigo para pasar del vector a las posiciones
-		int pieceX = originX + piece[1] * cellSize;
-		int pieceZ = originZ - piece[2] * cellSize;
-		glm::vec3 pieceZoom = glm::vec3(0.3f, 0.3f, 0.3f);
-		//if pieza blanca??
+		int pieceX = originX + piece[2] * cellSize;
+		int pieceZ = originZ - piece[3] * cellSize;
+		glm::vec3 pieceZoom = glm::vec3(0.2f, 0.2f, 0.2f);
 		glm::vec3 pieceRotation = glm::vec3(1.f, 0.f, 0.f);
 		glm::vec4 color;
 		
-		
+		(piece[1] == WHITE) ? color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f) : color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	
+		glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
 
 		switch (piece[0])
 		{
 		case PAWN:
-			color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
+			
 			pawn.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case BISHOP:
-			color = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
-			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
 			bishop.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case TOWER:
-			color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
-			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
 			tower.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case HORSE:
-			color = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
-			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
 			horse.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 00.f, pieceRotation, pieceZoom);
 			break;
 		case QUEEN:
-			color = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
-			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
 			queen.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case KING:
-			color = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
-			glUniform4fv(glGetUniformLocation(shaderProgram.ID, "color"), 1, glm::value_ptr(color));
 			king.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		default:
@@ -85,21 +77,53 @@ void drawPieces(Shader shaderProgram, Camera camera, Model board, Model pawn, Mo
 	
 }
 
+void updateBoard(GLFWwindow* window, int& i, int size, bool& released) {
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && i<size-1 && released)
+	{
+		released = false;
+		i++;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && i>0 && released)
+	{
+		released = false;
+		i--;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE && !released && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
+	{
+		released = true;
+	}
+}
+
+
+
 int main() {
 	std::vector<std::vector<std::vector<int>>> arraygame
 	{
-	{
-		{TOWER, A, 1},{HORSE, B, 1},{BISHOP, C, 1},{QUEEN, D, 1},{KING, E, 1},{BISHOP, F, 1},{HORSE, G, 1},{TOWER, H, 1},
-		{PAWN, A, 2},{PAWN, B, 2},{PAWN, C, 2},{PAWN, D, 2},{PAWN, E, 2},{PAWN, F, 2},{PAWN, G, 2},{PAWN, H, 2},
-		{TOWER, A, 8},{HORSE, B, 8},{BISHOP, C, 8},{KING, D, 8},{QUEEN, E, 8},{BISHOP, F, 8},{HORSE, G, 8},{TOWER, H, 8},
-		{PAWN, A, 7},{PAWN, B, 7},{PAWN, C, 7},{PAWN, D, 7},{PAWN, E, 7},{PAWN, F, 7},{PAWN, G, 7},{PAWN, H, 7}
-	},
-	{
-		{TOWER, A, 1},{HORSE, B, 1},{BISHOP, C, 1},{QUEEN, D, 1},{KING, E, 1},{BISHOP, F, 1},{HORSE, G, 1},{TOWER, H, 1},
-		{PAWN, A, 2},{PAWN, B, 2},{PAWN, C, 3}, {PAWN, D, 2},{PAWN, E, 2},{PAWN, F, 2},{PAWN, G, 2},{PAWN, H, 2},
-		{TOWER, A, 8},{HORSE, B, 8},{BISHOP, C, 8},{KING, D, 8},{QUEEN, E, 8},{BISHOP, F, 8},{HORSE, G, 8},{TOWER, H, 8},
-		{PAWN, A, 7},{PAWN, B, 7},{PAWN, C, 7},{PAWN, D, 7},{PAWN, E, 7},{PAWN, F, 7},{PAWN, G, 7},{PAWN, H, 7}
-	} };
+		{
+			{TOWER, WHITE, A, 1},{HORSE, WHITE, B, 1},{BISHOP, WHITE, C, 1},{QUEEN, WHITE, D, 1},{KING, WHITE, E, 1},{BISHOP, WHITE, F, 1},{HORSE, WHITE, G, 1},{TOWER, WHITE, H, 1},
+			{PAWN, WHITE, A, 2},{PAWN, WHITE, B, 2},{PAWN, WHITE, C, 2},{PAWN, WHITE, D, 2},{PAWN, WHITE, E, 2},{PAWN, WHITE, F, 2},{PAWN, WHITE, G, 2},{PAWN, WHITE, H, 2},
+			{TOWER, BLACK, A, 8},{HORSE, BLACK, B, 8},{BISHOP, BLACK, C, 8},{KING, BLACK, D, 8},{QUEEN, BLACK, E, 8},{BISHOP, BLACK, F, 8},{HORSE, BLACK, G, 8},{TOWER, BLACK, H, 8},
+			{PAWN, BLACK, A, 7},{PAWN, BLACK, B, 7},{PAWN, BLACK, C, 7},{PAWN, BLACK, D, 7},{PAWN, BLACK, E, 7},{PAWN, BLACK, F, 7},{PAWN, BLACK, G, 7},{PAWN, BLACK, H, 7}
+		},
+		{
+			{TOWER, WHITE, A, 1},{HORSE, WHITE, B, 1},{BISHOP, WHITE, C, 1},{QUEEN, WHITE, D, 1},{KING, WHITE, E, 1},{BISHOP, WHITE, F, 1},{HORSE, WHITE, G, 1},{TOWER, WHITE, H, 1},
+			{PAWN, WHITE, A, 2},{PAWN, WHITE, B, 2},{PAWN, WHITE, C, 3},{PAWN, WHITE, D, 2},{PAWN, WHITE, E, 2},{PAWN, WHITE, F, 2},{PAWN, WHITE, G, 2},{PAWN, WHITE, H, 2},
+			{TOWER, BLACK, A, 8},{HORSE, BLACK, B, 8},{BISHOP, BLACK, C, 8},{KING, BLACK, D, 8},{QUEEN, BLACK, E, 8},{BISHOP, BLACK, F, 8},{HORSE, BLACK, G, 8},{TOWER, BLACK, H, 8},
+			{PAWN, BLACK, A, 7},{PAWN, BLACK, B, 7},{PAWN, BLACK, C, 7},{PAWN, BLACK, D, 7},{PAWN, BLACK, E, 7},{PAWN, BLACK, F, 7},{PAWN, BLACK, G, 7},{PAWN, BLACK, H, 7}
+		},
+		{
+			{TOWER, WHITE, A, 1},{HORSE, WHITE, B, 1},{BISHOP, WHITE, C, 1},{QUEEN, WHITE, D, 1},{KING, WHITE, E, 1},{BISHOP, WHITE, F, 1},{HORSE, WHITE, G, 1},{TOWER, WHITE, H, 1},
+			{PAWN, WHITE, A, 2},{PAWN, WHITE, B, 2},{PAWN, WHITE, C, 3},{PAWN, WHITE, D, 2},{PAWN, WHITE, E, 2},{PAWN, WHITE, F, 2},{PAWN, WHITE, G, 2},{PAWN, WHITE, H, 2},
+			{TOWER, BLACK, A, 8},{HORSE, BLACK, B, 8},{BISHOP, BLACK, C, 8},{KING, BLACK, D, 8},{QUEEN, BLACK, E, 8},{BISHOP, BLACK, F, 8},{HORSE, BLACK, G, 8},{TOWER, BLACK, H, 8},
+			{PAWN, BLACK, A, 7},{PAWN, BLACK, B, 7},{PAWN, BLACK, C, 7},{PAWN, BLACK, D, 7},{PAWN, BLACK, E, 6},{PAWN, BLACK, F, 7},{PAWN, BLACK, G, 7},{PAWN, BLACK, H, 7}
+		},
+		{
+			{TOWER, WHITE, A, 1},{HORSE, WHITE, B, 1},{BISHOP, WHITE, C, 1},{QUEEN, WHITE, D, 1},{KING, WHITE, E, 1},{BISHOP, WHITE, F, 1},{HORSE, WHITE, G, 1},{TOWER, WHITE, H, 1},
+			{PAWN, WHITE, A, 2},{PAWN, WHITE, B, 4},{PAWN, WHITE, C, 3},{PAWN, WHITE, D, 2},{PAWN, WHITE, E, 2},{PAWN, WHITE, F, 2},{PAWN, WHITE, G, 2},{PAWN, WHITE, H, 2},
+			{TOWER, BLACK, A, 8},{HORSE, BLACK, B, 8},{BISHOP, BLACK, C, 8},{KING, BLACK, D, 8},{QUEEN, BLACK, E, 8},{BISHOP, BLACK, F, 8},{HORSE, BLACK, G, 8},{TOWER, BLACK, H, 8},
+			{PAWN, BLACK, A, 7},{PAWN, BLACK, B, 7},{PAWN, BLACK, C, 7},{PAWN, BLACK, D, 7},{PAWN, BLACK, E, 6},{PAWN, BLACK, F, 7},{PAWN, BLACK, G, 7},{PAWN, BLACK, H, 7}
+		},	
+	};
 
 	//Inicializar GLFW
 	glfwInit();
@@ -125,21 +149,23 @@ int main() {
 	//Importamos las texturas
 	Texture textures[]
 	{
-		Texture("planks.png", "diffuse", 0),
+		//Texture("white_wood.png", "diffuse", 0),
+		//Texture("black_wood.png", "diffuse", 0),
+		Texture("models/textures/board.png", "diffuse", 0),
 	};
 	Shader shaderProgram("default.vert", "default.frag");
 
 	//Creamos los modelos y la cámara
 	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
-	Model board("models/board_2.obj");
+	Model board("models/board.obj");
 	Model pawn("models/pawn.obj");
 	Model bishop("models/bishop.obj");
 	Model tower("models/tower.obj");
 	Model horse("models/horse.obj");
 	Model queen("models/queen.obj");
 	Model king("models/king.obj");
-
-
+	bool released = true;
+	int i = 0;
 	while (!glfwWindowShouldClose(window)) {
 
 		// Ajustamos color barrido
@@ -151,11 +177,8 @@ int main() {
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
 		//Dibujamos tablero y piezas
-		//Draw(shader, camara, vector translacion, angulo rotacion en radianes, vector ejes rotacion, vector escalado)
-		//board.Draw(shaderProgram, camera, glm::vec3(0.0f, -4.6f, 0.0f), 1.5708f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f));
-		//king.Draw(shaderProgram, camera, glm::vec3(0.0f, 0.0f, 0.0f), 0.f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.5f, 0.5f, 0.5f));
-		drawPieces(shaderProgram, camera, board, pawn, bishop, tower, horse, queen, king, arraygame[1]);
-
+		drawPieces(shaderProgram, camera, board, pawn, bishop, tower, horse, queen, king, arraygame[i]);
+		updateBoard(window, i, arraygame.size(), released);
 		//Intercambio de buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
