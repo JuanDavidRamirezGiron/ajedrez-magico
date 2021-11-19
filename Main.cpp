@@ -100,11 +100,11 @@ int main() {
 
 	plays = reader->gatherInformation();
 
-	PGNToFENParser* parser = new PGNToFENParser();
+	/*PGNToFENParser* parser = new PGNToFENParser();
 	parser->initializeInternalChessBoard();
 	parser->parsePGNToFEN(plays);
 
-	exit(0);
+	exit(0);*/
 
 	std::vector<std::vector<std::vector<int>>> arraygame
 	{
