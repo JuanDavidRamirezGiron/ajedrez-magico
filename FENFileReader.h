@@ -23,8 +23,9 @@ public:
 		this->filename = filename;
 	}
 
-	void prepareBoard();
+	vector<vector<vector<char>>> prepareBoard();
 	void printRawBoard(vector<string> rawBoard);
 	void printTransformedBoard(vector<vector<char>> transformedBoard);
+	void printAllBoardStatus(vector<vector<vector<char>>> allBoardStatus);
 
 };

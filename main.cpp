@@ -113,9 +113,13 @@ int main() {
 
 	FENFileReader* reader = new FENFileReader("Jugadas.fen");
 
-	reader->prepareBoard();
+	vector<vector<vector<char>>> allBoardStatus;
 
-	exit(0);
+	allBoardStatus = reader->prepareBoard();
+
+	reader->printAllBoardStatus(allBoardStatus);
+
+	//exit(0);
 
 	/*PGNToFENParser* parser = new PGNToFENParser();
 	parser->initializeInternalChessBoard();
