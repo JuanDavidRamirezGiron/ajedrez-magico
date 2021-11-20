@@ -175,7 +175,7 @@ int main() {
 
 	//Creamos los modelos y la cámara
 	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
-	Model board("models/board.obj");
+	Model board("models/board_2.obj");
 	Model pawn("models/pawn.obj");
 	Model bishop("models/bishop.obj");
 	Model tower("models/tower.obj");
