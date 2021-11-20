@@ -1,5 +1,6 @@
-﻿#include "FileReader.h"
+﻿#include "PGNFileReader.h"
 #include "PGNToFENParser.h"
+#include "FENFileReader.h"
 #include <Windows.h>
 #include <cstdio>
 #include"Model.h"
@@ -104,11 +105,17 @@ int main() {
 
 	cout << "Empieza la lectura del programa" << endl;
 
-	FileReader* reader = new FileReader("Jugadas.pgn");
+	/*PGNFileReader* reader = new PGNFileReader("Jugadas.pgn");
 
 	map<int, pair<string, string>> plays;
 
-	plays = reader->gatherInformation();
+	plays = reader->gatherInformation();*/
+
+	FENFileReader* reader = new FENFileReader("Jugadas.fen");
+
+	reader->prepareBoard();
+
+	exit(0);
 
 	/*PGNToFENParser* parser = new PGNToFENParser();
 	parser->initializeInternalChessBoard();

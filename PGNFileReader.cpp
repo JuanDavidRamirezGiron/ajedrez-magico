@@ -1,6 +1,6 @@
-#include "FileReader.h"
+#include "PGNFileReader.h"
 
-map<int, pair<string, string>> FileReader::gatherInformation()
+map<int, pair<string, string>> PGNFileReader::gatherInformation()
 {
 	//string information;
 
@@ -55,7 +55,7 @@ map<int, pair<string, string>> FileReader::gatherInformation()
 	return dict;
 }
 
-string FileReader::removeBrackets(string line)
+string PGNFileReader::removeBrackets(string line)
 {
 
 	if (line.length() > 2) {
@@ -67,7 +67,7 @@ string FileReader::removeBrackets(string line)
 	return line;
 }
 
-string FileReader::reorderPlayerNames(string name)
+string PGNFileReader::reorderPlayerNames(string name)
 {
 
 	vector<string> positions;
@@ -86,7 +86,7 @@ string FileReader::reorderPlayerNames(string name)
 	return name + " " + positions[0];
 }
 
-void FileReader::getGeneralinformation(int i, string line)
+void PGNFileReader::getGeneralinformation(int i, string line)
 {
 
 	switch (i) {
@@ -117,7 +117,7 @@ void FileReader::getGeneralinformation(int i, string line)
 
 }
 
-void FileReader::getPlays(vector<string> &origin, vector<string> &destiny, string line)
+void PGNFileReader::getPlays(vector<string> &origin, vector<string> &destiny, string line)
 {
 
 	string delimiter = " ";
@@ -148,7 +148,7 @@ void FileReader::getPlays(vector<string> &origin, vector<string> &destiny, strin
 
 }
 
-bool FileReader::validatePlays(vector<string> &origin, vector<string> &destiny)
+bool PGNFileReader::validatePlays(vector<string> &origin, vector<string> &destiny)
 {
 	
 	if (destiny.size() > origin.size()) {
@@ -167,7 +167,7 @@ bool FileReader::validatePlays(vector<string> &origin, vector<string> &destiny)
 }
 
 template<typename Map>
-void FileReader::printDictionary(Map& m)
+void PGNFileReader::printDictionary(Map& m)
 {
 
 	for (map<int, pair<string, string> >::const_iterator it = m.begin(); it != m.end(); ++it)
@@ -175,7 +175,7 @@ void FileReader::printDictionary(Map& m)
 
 }
 
-map<int, pair<string, string>> FileReader::createDictionary(vector<string> &origin, vector<string> &destiny)
+map<int, pair<string, string>> PGNFileReader::createDictionary(vector<string> &origin, vector<string> &destiny)
 {
 	map<int, pair<string, string>> dict;
 
