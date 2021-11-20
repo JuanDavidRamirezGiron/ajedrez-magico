@@ -13,6 +13,10 @@ class FENFileReader {
 	string filename;
 
 private:
+	string retrievePlays(string line);
+	vector<string> generateRawBoard(string plays);
+	vector<vector<char>> transformRawBoard(vector<string>);
+
 public:
 
 	FENFileReader(string filename) {
@@ -20,5 +24,7 @@ public:
 	}
 
 	void prepareBoard();
+	void printRawBoard(vector<string> rawBoard);
+	void printTransformedBoard(vector<vector<char>> transformedBoard);
 
 };
