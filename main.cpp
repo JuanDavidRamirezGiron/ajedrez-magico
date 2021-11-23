@@ -117,7 +117,103 @@ int main() {
 
 	allBoardStatus = reader->prepareBoard();
 
-	reader->printAllBoardStatus(allBoardStatus);
+
+	//int count = 0;
+	vector<vector<vector<int>>> testVector;
+	vector<vector<int>> outerVector;
+	vector<int> auxVector;
+
+	for(vector<vector<char>> boards : allBoardStatus)
+	{
+
+		outerVector.clear();
+		auxVector.clear();
+
+		for (size_t row = 0; row < boards.size(); row++)
+		{
+
+			for (size_t col = 0; col < boards[row].size(); col++)
+			{
+				char currentPiece = boards[row][col];
+
+				if (!isdigit(currentPiece)) {
+					//cout << "Count:" << count << endl;
+					//cout << "Pieza es: " << boards[row][col] << endl;
+					//count++;
+
+					if (isupper(currentPiece)) {
+
+						switch (currentPiece) {
+							case 'R':
+								auxVector = { TOWER, WHITE, (int)row + 1, (int)col + 1 };
+								outerVector.push_back(auxVector);
+
+								break;
+							case 'N':
+								auxVector = { HORSE, WHITE, (int)row + 1, (int)col + 1 };
+								outerVector.push_back(auxVector);
+								break;
+							case 'B':
+								auxVector = { BISHOP, WHITE, (int)row + 1, (int)col + 1 };
+								outerVector.push_back(auxVector);
+								break;
+							case 'Q':
+								auxVector = { QUEEN, WHITE, (int)row + 1, (int)col + 1 };
+								outerVector.push_back(auxVector);
+								break;
+							case 'K':
+								auxVector = { KING, WHITE, (int)row + 1, (int)col + 1 };
+								outerVector.push_back(auxVector);
+								break;
+							case 'P':
+								auxVector = { PAWN, WHITE, (int)row + 1, (int)col + 1 };
+								outerVector.push_back(auxVector);
+								break;
+						}
+
+					}
+					else {
+
+						switch (currentPiece) {
+						case 'r':
+							auxVector = { TOWER, BLACK, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
+							break;
+						case 'n':
+							auxVector = { HORSE, BLACK, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
+							break;
+						case 'b':
+							auxVector = { BISHOP, BLACK, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
+							break;
+						case 'q':
+							auxVector = { QUEEN, BLACK, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
+							break;
+						case 'k':
+							auxVector = { KING, BLACK, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
+							break;
+						case 'p':
+							auxVector = { PAWN, BLACK, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
+							break;
+						}
+
+					}
+
+				}
+
+			}
+			
+		}
+
+		testVector.push_back(outerVector);
+		
+	}
+
+	//reader->printAllBoardStatus(allBoardStatus);
 
 	//exit(0);
 
@@ -206,8 +302,8 @@ int main() {
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
 		//Dibujamos tablero y piezas
-		drawPieces(shaderProgram, camera, board, pawn, bishop, tower, horse, queen, king, arraygame[i]);
-		updateBoard(window, i, arraygame.size(), released);
+		drawPieces(shaderProgram, camera, board, pawn, bishop, tower, horse, queen, king, testVector[i]);
+		updateBoard(window, i, testVector.size(), released);
 		//Intercambio de buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
