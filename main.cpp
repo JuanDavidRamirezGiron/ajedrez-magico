@@ -1,4 +1,4 @@
-﻿#include "PGNFileReader.h"
+#include "PGNFileReader.h"
 #include "PGNToFENParser.h"
 #include "FENFileReader.h"
 #include <Windows.h>
@@ -123,7 +123,7 @@ int main() {
 	vector<vector<int>> outerVector;
 	vector<int> auxVector;
 
-	for(vector<vector<char>> boards : allBoardStatus)
+	for (vector<vector<char>> boards : allBoardStatus)
 	{
 
 		outerVector.clear();
@@ -144,31 +144,31 @@ int main() {
 					if (isupper(currentPiece)) {
 
 						switch (currentPiece) {
-							case 'R':
-								auxVector = { TOWER, WHITE, (int)row + 1, (int)col + 1 };
-								outerVector.push_back(auxVector);
+						case 'R':
+							auxVector = { TOWER, WHITE, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
 
-								break;
-							case 'N':
-								auxVector = { HORSE, WHITE, (int)row + 1, (int)col + 1 };
-								outerVector.push_back(auxVector);
-								break;
-							case 'B':
-								auxVector = { BISHOP, WHITE, (int)row + 1, (int)col + 1 };
-								outerVector.push_back(auxVector);
-								break;
-							case 'Q':
-								auxVector = { QUEEN, WHITE, (int)row + 1, (int)col + 1 };
-								outerVector.push_back(auxVector);
-								break;
-							case 'K':
-								auxVector = { KING, WHITE, (int)row + 1, (int)col + 1 };
-								outerVector.push_back(auxVector);
-								break;
-							case 'P':
-								auxVector = { PAWN, WHITE, (int)row + 1, (int)col + 1 };
-								outerVector.push_back(auxVector);
-								break;
+							break;
+						case 'N':
+							auxVector = { HORSE, WHITE, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
+							break;
+						case 'B':
+							auxVector = { BISHOP, WHITE, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
+							break;
+						case 'Q':
+							auxVector = { QUEEN, WHITE, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
+							break;
+						case 'K':
+							auxVector = { KING, WHITE, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
+							break;
+						case 'P':
+							auxVector = { PAWN, WHITE, (int)row + 1, (int)col + 1 };
+							outerVector.push_back(auxVector);
+							break;
 						}
 
 					}
@@ -206,11 +206,11 @@ int main() {
 				}
 
 			}
-			
+
 		}
 
 		testVector.push_back(outerVector);
-		
+
 	}
 
 	//reader->printAllBoardStatus(allBoardStatus);
@@ -280,7 +280,7 @@ int main() {
 	};
 	Shader shaderProgram("default.vert", "default.frag");
 
-	//Creamos los modelos y la cámara
+	//Creamos los modelos y la c�mara
 	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
 	Model board("models/board_2.obj");
 	Model pawn("models/pawn.obj");
