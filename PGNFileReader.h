@@ -9,7 +9,7 @@
 
 using namespace std;
 
-class FileReader {
+class PGNFileReader {
 
 private :
 	string filename;
@@ -20,7 +20,7 @@ private :
 	map<int, pair<string, string>> createDictionary(vector<string>& origin, vector<string>& destiny);
 
 public: 
-	FileReader(string filename) {
+	PGNFileReader(string filename) {
 		this->filename = filename;
 	}
 
