@@ -33,14 +33,7 @@ void Mesh::Draw(Shader& shader, Camera& camera, glm::vec3 translation, GLfloat r
 	{
 		std::string num;
 		std::string type = textures[i].type;
-		if (type == "diffuse")
-		{
-			num = std::to_string(numDiffuse++);
-		}
-		else //if (type == "specular")
-		{
-			num = std::to_string(numSpecular++);
-		}
+		num = std::to_string(numDiffuse++);
 		textures[i].texUnit(shader, (type + num).c_str(), i);
 		textures[i].Bind();
 	}

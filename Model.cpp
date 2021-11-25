@@ -22,9 +22,8 @@ int Model::loadModel(const char* filename) {
 	std::vector < glm::vec3 > out_vertices;
 	std::vector < glm::vec2 > out_uvs;
 	std::vector < glm::vec3 > out_normals;
-
-
-
+	std::vector<Texture> textures;
+	char mtl_file[128];
 
 	FILE* file = fopen(filename, "r");
 	if (file == NULL) {
@@ -32,7 +31,7 @@ int Model::loadModel(const char* filename) {
 		return -1;
 	}
 	while (1) {
-
+		
 		char lineHeader[128];
 		// read the first word of the line
 		int res = fscanf(file, "%s", lineHeader);
@@ -40,6 +39,10 @@ int Model::loadModel(const char* filename) {
 			break; // EOF = End Of File. Quit the loop.
 
 		// else : parse lineHeader
+		//MTL
+		if (strcmp(lineHeader, "mtllib") == 0) {
+			fscanf(file, "%s\n", &mtl_file);
+		}
 		//COORDS
 		if (strcmp(lineHeader, "v") == 0) {
 			glm::vec3 vertex;
@@ -96,12 +99,42 @@ int Model::loadModel(const char* filename) {
 		glm::vec3 normal = temp_normals[normalIndex - 1];
 		out_normals.push_back(normal);
 	}
+	
+	//Abrimos el mtl para buscar donde se encuentra la textura
+	std::string  mtl_file_dir = mtl_file;
+	std::string mtl = "models/" + mtl_file_dir;
+	FILE* file2 = fopen(mtl.c_str(), "r");
+	if (file2 == NULL) {
+		printf("Impossible to open the file !\n");
+		return -1;
+	}
+	while (1) {
+
+		char lineHeader2[128];
+		int res = fscanf(file2, "%s", lineHeader2);
+		if (res == EOF)
+			break;
+
+			if (strcmp(lineHeader2, "map_Kd") == 0) {
+				char texturename[128];
+				fscanf(file2, "%s\n", &texturename);
+				std::string  png_file_dir = texturename;
+				std::string png = "models/" + png_file_dir;
+				Texture tex(png.c_str(), "diffuse", 0);
+				textures.push_back(tex);
+			}
+		
+		
+	}
+	///////////////////////////////////////////////////////////////////////////////
+
+	//map_Kd
+	
 
 	// Combine all the vertex components and also get the indices and textures
 	//out_vertices = positions
 	std::vector<Vertex> vertices = assembleVertices(out_vertices, out_normals, out_uvs);
 	std::vector<GLuint> indices; //= getIndices(JSON["accessors"][indAccInd]);
-	std::vector<Texture> textures; //= getTextures();
 
 	// Combine the vertices, indices, and textures into a mesh
 	meshes.push_back(Mesh(vertices, indices, textures));
@@ -117,7 +150,9 @@ std::vector<Vertex> Model::assembleVertices(std::vector<glm::vec3> positions, st
 		(
 			Vertex
 			{
-				positions[i], normals[i], glm::vec3(1.0f, 1.0f, 1.0f),
+				positions[i],
+				normals[i],
+				glm::vec3(1.0f, 1.0f, 1.0f),
 				texUVs[i]
 			}
 		);
