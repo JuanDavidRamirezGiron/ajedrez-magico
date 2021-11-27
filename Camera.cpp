@@ -2,11 +2,13 @@
 
 
 
-Camera::Camera(int width, int height, glm::vec3 position)
+Camera::Camera(int width, int height, glm::vec3 position, glm::vec3 orientation, glm::vec3 up)
 {
 	Camera::width = width;
 	Camera::height = height;
 	Position = position;
+	Orientation = orientation;
+	Up = up;
 }
 
 void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane)
@@ -63,6 +65,29 @@ void Camera::Inputs(GLFWwindow* window)
 	{
 		speed = 0.4f;
 	}
+	//Types of Camera
+	//Above board
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+	{
+		Position = glm::vec3(3.6341f, 22.8766f, 1.2473f);
+		Orientation = glm::vec3(-0.1339f, -0.9960f, -0.0002f);
+		Up = glm::vec3(0.0000f, 1.0000f, 0.0000f);
+	}
+	//Black pieces view
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+	{
+		Position = glm::vec3(-12.4933f, 12.0020f, 1.0377);
+		Orientation = glm::vec3(0.6499f, -0.7665f, -0.0088);
+		Up = glm::vec3(0.0000f, 1.0000f, 0.0000f);
+	}
+	//White pieces view
+	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+	{
+		Position = glm::vec3(12.9689f, 12.1829f, 1.2105f);
+		Orientation = glm::vec3(-0.6499f, -0.7665f, 0.0035f);
+		Up = glm::vec3(0.0000f, 1.0000f, 0.0000f);
+	}
+
 	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
 	{
 		speed = 0.1f;
