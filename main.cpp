@@ -22,8 +22,8 @@
 #define BLACK false
 
 //Constantes medida ventana
-const unsigned int width = 1280;
-const unsigned int height = 720;
+const unsigned int width = 1920;
+const unsigned int height = 1080;
 
 
 void drawPieces(Shader shaderProgram, Camera camera, Model board, Model pawn, Model bishop, Model tower, Model horse, Model queen, Model king, std::vector<std::vector<int>> arraygame) {
@@ -274,7 +274,7 @@ int main() {
 	//Creamos los modelos y la c�mara
 	//Creamos los modelos y la c�mara
 	Camera camera(width, height, glm::vec3(3.6341f, 22.8766f, 1.2473f), glm::vec3(-0.1339f, -0.9960f, -0.0002f), glm::vec3(0.0000f, 1.0000f, 0.0000f));
-	Model board("models/board_2.obj");
+	Model board("models/board.obj");
 	Model pawn("models/pawn.obj");
 	Model bishop("models/bishop.obj");
 	Model tower("models/tower.obj");
