@@ -22,8 +22,8 @@
 #define BLACK false
 
 //Constantes medida ventana
-const unsigned int width = 1920;
-const unsigned int height = 1080;
+const unsigned int width = 1920; //1280
+const unsigned int height = 1080; //720
 
 
 unsigned int quadVAO = 0;
