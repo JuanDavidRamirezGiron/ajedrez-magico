@@ -26,36 +26,6 @@ const unsigned int width = 1280;
 const unsigned int height = 720;
 
 
-unsigned int quadVAO = 0;
-unsigned int quadVBO;
-void renderQuad()
-{
-	if (quadVAO == 0)
-	{
-		float quadVertices[] = {
-			// positions        // texture Coords
-			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-			 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-			 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-		};
-		// setup plane VAO
-		glGenVertexArrays(1, &quadVAO);
-		glGenBuffers(1, &quadVBO);
-		glBindVertexArray(quadVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	}
-	glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
-}
-
-
 void drawPieces(Shader shaderProgram, Camera camera, Model board, Model pawn, Model bishop, Model tower, Model horse, Model queen, Model king, std::vector<std::vector<int>> arraygame) {
 
 	const int originX = -9;
@@ -301,12 +271,10 @@ int main() {
 	//Creamos los modelos y la cámara
 	//Cargamos shaders
 	Shader shaderProgram("default.vert", "default.frag");
-	Shader simpleDepthShader("simpleDepthShader.vert", "simpleDepthShader.frag");
-	Shader debugDepthQuad("debug_quad.vert", "debug_quad.frag");
 	//Creamos los modelos y la c�mara
 	//Creamos los modelos y la c�mara
-	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
-	Model board("models/board.obj");
+	Camera camera(width, height, glm::vec3(3.6341f, 22.8766f, 1.2473f), glm::vec3(-0.1339f, -0.9960f, -0.0002f), glm::vec3(0.0000f, 1.0000f, 0.0000f));
+	Model board("models/board_2.obj");
 	Model pawn("models/pawn.obj");
 	Model bishop("models/bishop.obj");
 	Model tower("models/tower.obj");
@@ -322,86 +290,18 @@ int main() {
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// configure depth map FBO
-	// -----------------------
-	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
-	unsigned int depthMapFBO;
-	glGenFramebuffers(1, &depthMapFBO);
-	// create depth texture
-	unsigned int depthMap;
-	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// attach depth texture as FBO's depth buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	// Always check that our framebuffer is ok
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		return false;
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// shader configuration
-	// --------------------
-	shaderProgram.Activate();
-	glUniform1i(glGetUniformLocation(shaderProgram.ID, "diffuse0"), 0);
-	glUniform1i(glGetUniformLocation(shaderProgram.ID, "shadowMap"), 1);
-	debugDepthQuad.Activate();
-	glUniform1i(glGetUniformLocation(debugDepthQuad.ID, "depthMap"), 0);
-
 	while (!glfwWindowShouldClose(window)) {
+
 		// Ajustamos color barrido
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		//Controlamos inputs para la camara
 		camera.Inputs(window);
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
-		// 1. render depth of scene to texture (from light's perspective)
-		float near_plane = 1.0f, far_plane = 7.5f;
-		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-		glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
-		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-
-		// render scene from light's point of view
-		simpleDepthShader.Activate();
-		glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
-
-		glViewport(0, 0, width, height);
-		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-			glClear(GL_DEPTH_BUFFER_BIT);
-			glActiveTexture(GL_TEXTURE0);
-			drawPieces(simpleDepthShader, camera, board, pawn, bishop, tower, horse, queen, king, testVector[i]);
-		
-		// 2. render scene as normal using the generated depth/shadow map
-		glBindFramebuffer(GL_FRAMEBUFFER, 0); 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		shaderProgram.Activate();
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
-		glUniform1i(glGetUniformLocation(shaderProgram.ID, "depthMap"), 1);
+		//Dibujamos tablero y piezas
 		drawPieces(shaderProgram, camera, board, pawn, bishop, tower, horse, queen, king, testVector[i]);
-		
-		
-		// 3. render Depth map to quad for visual debugging
-		debugDepthQuad.Activate();
-		glUniform1f(glGetUniformLocation(debugDepthQuad.ID, "near_plane"), near_plane);
-		glUniform1f(glGetUniformLocation(debugDepthQuad.ID, "far_plane"), far_plane);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
-		//renderQuad();
-		
-		
 		updateBoard(window, i, testVector.size(), released);
 		//Intercambio de buffers
 		glfwSwapBuffers(window);
@@ -411,4 +311,3 @@ int main() {
 	glfwTerminate();
 	return 0;
 }
-
