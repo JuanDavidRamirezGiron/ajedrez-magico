@@ -6,16 +6,18 @@ out vec4 FragColor;
 in vec3 crntPos;
 in vec3 Normal;
 in vec2 texCoord;
+in vec4 FragPosLightSpace;
 
-
-
+uniform sampler2D shadowMap;
 uniform sampler2D diffuse0;
+
 uniform vec4 lightColor;
 uniform vec3 lightPos;
 uniform vec3 camPos;
+uniform mat4 depthMVP;
 
 
-vec4 direcLight()
+void main()
 {
 	// ambient lighting
 	float ambient = 0.4f;
@@ -32,12 +34,15 @@ vec4 direcLight()
 	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
 	float specular = specAmount * specularLight;
 
-	return texture (diffuse0, texCoord) * (diffuse + ambient + specular) * lightColor;
+	//calculate shadows
+	vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(shadowMap, projCoords.xy).r; 
+    float currentDepth = projCoords.z;
+    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+	
+	//final texture
+	FragColor = texture (diffuse0, texCoord) * ((diffuse + specular) * shadow + ambient) * lightColor;
+	//FragColor = vec4(currentDepth);
 }
 
-
-
-void main()
-{
-	FragColor = direcLight();
-}

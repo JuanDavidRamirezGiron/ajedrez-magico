@@ -19,6 +19,7 @@ out vec3 color;
 // Outputs the texture coordinates to the Fragment Shader
 out vec2 texCoord;
 
+out vec4 FragPosLightSpace;
 
 
 // Imports the camera matrix
@@ -28,7 +29,7 @@ uniform mat4 model;
 uniform mat4 translation;
 uniform mat4 rotation;
 uniform mat4 scale;
-
+uniform mat4 lightSpaceMatrix;
 
 void main()
 {
@@ -43,5 +44,9 @@ void main()
 	texCoord =  aTex;
 	
 	// Outputs the positions/coordinates of all vertices
+	
+
+
+	FragPosLightSpace = lightSpaceMatrix * vec4(crntPos, 1.0);
 	gl_Position = camMatrix * vec4(crntPos, 1.0);
 }
