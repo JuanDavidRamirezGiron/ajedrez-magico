@@ -42,7 +42,7 @@ void main()
     float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
 	
 	//final texture
-	FragColor = texture (diffuse0, texCoord) * ((diffuse + specular) * shadow + ambient) * lightColor;
+	FragColor = texture (diffuse0, texCoord) * ((diffuse + specular) + ambient) * lightColor;
 	//FragColor = vec4(currentDepth);
 }
 
