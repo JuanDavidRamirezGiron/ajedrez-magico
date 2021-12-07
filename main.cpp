@@ -1,6 +1,7 @@
 #include "PGNFileReader.h"
 #include "PGNToFENParser.h"
 #include "FENFileReader.h"
+#include "movements.h"
 #include <Windows.h>
 #include <cstdio>
 #include"Model.h"
@@ -24,6 +25,91 @@
 //Constantes medida ventana
 const unsigned int width = 1280;
 const unsigned int height = 720;
+
+// Punt_Corba_Spline: Calcul del punt del spline en coordenades 3D (CPunt3D) segons el 
+//             paràmetre i i els punts de control ctr 
+glm::vec3 Punt_Corba_BSpline(float t, glm::vec3* ctr)
+{
+	// Matriu dels Splines
+	const double AS[4][4] =
+	{
+		{ -1.0 / 6.0, 0.5, -0.5, 1.0 / 6.0 },
+		{ 0.5, -1.0, 0.0, 4.0 / 6.0 },
+		{ -0.5, 0.5, 0.5, 1.0 / 6.0 },
+		{ 1.0 / 6.0, 0.0, 0.0, 0.0 }
+	};
+
+	glm::vec3 p = { 0, 0, 0 };
+	float coef[4];
+	int i, j;
+
+	// Polinomis que multipliquen els punts de control del patch
+	for (i = 0; i < 4; i++)
+	{
+		coef[i] = 0;
+		for (j = 0; j < 4; j++)
+			coef[i] = coef[i] * t + AS[i][j];
+	}
+
+	// Càlcul de la Posició
+	for (i = 0; i < 4; i++)
+	{
+		p.x += coef[i] * ctr[i].x;
+		p.y += coef[i] * ctr[i].y;
+		p.z += coef[i] * ctr[i].z;
+	}
+	return p;
+
+}
+
+vector<glm::vec3> draw_TFBSpline_Curve(vector<glm::vec3> ctr_points, int nptsCorba, float pas)
+{
+	glm::vec3 vertexL1, vertexL2;
+	glm::vec3 ctr[4];		// Punts control del patch de la B-Spline.
+	int patch = 0;		// Patch actual.
+	GLfloat t = 0;
+	vector<glm::vec3> puntsCorba;
+
+	//t = t - pas;
+// Càrrega primers punts de control.
+	for (int i = 0; i < 4; i++)
+	{
+		ctr[i].x = ctr_points[i].x;
+		ctr[i].y = ctr_points[i].y;
+		ctr[i].z = ctr_points[i].z;
+	}
+
+	// Càlcul i dibuix Triedre de Frenet en cada vèrtex de la corba B-Spline
+	vertexL1 = Punt_Corba_BSpline(t, ctr);
+
+	t = t + pas;
+	while (patch <= nptsCorba - 4) {
+		if (t >= 1.0)
+		{
+			vertexL2 = Punt_Corba_BSpline(1.0, ctr);
+			puntsCorba.push_back(vertexL2);
+			t = 0.0;
+			patch++;
+			if (patch <= nptsCorba - 4)
+			{
+				for (int i = 0; i < 4; i++)
+				{
+					ctr[i].x = ctr_points[patch + i].x;
+					ctr[i].y = ctr_points[patch + i].y;
+					ctr[i].z = ctr_points[patch + i].z;
+				}
+			}
+		}
+		else if (patch <= nptsCorba - 4) {
+			vertexL2 = Punt_Corba_BSpline(t, ctr);
+			puntsCorba.push_back(vertexL2);
+			vertexL1 = vertexL2;
+			t = t + pas;
+		}
+	}
+	return puntsCorba;
+}
+
 
 
 void drawPieces(Shader shaderProgram, Camera camera, Model board, Model pawn, Model bishop, Model tower, Model horse, Model queen, Model king, std::vector<std::vector<int>> arraygame) {
@@ -103,16 +189,19 @@ int main() {
 	plays = reader->gatherInformation();*/
 
 	FENFileReader* reader = new FENFileReader("Jugadas.fen");
+	Movements* reader1 = new Movements;
 
 	vector<vector<vector<char>>> allBoardStatus;
 
 	allBoardStatus = reader->prepareBoard();
 
 
-	//int count = 0;
+	int count = 0;
 	vector<vector<vector<int>>> testVector;
 	vector<vector<int>> outerVector;
 	vector<int> auxVector;
+	vector<glm::vec3> controlPoints;
+	vector<glm::vec3> punts;
 
 	for (vector<vector<char>> boards : allBoardStatus)
 	{
@@ -202,50 +291,23 @@ int main() {
 
 		testVector.push_back(outerVector);
 
+
 	}
 
-	//reader->printAllBoardStatus(allBoardStatus);
+	
 
+	//reader->printTransformedBoard(allBoardStatus[0]);
+
+	//reader->printAllBoardStatus(allBoardStatus);
+	//reader1->RawBoard(allBoardStatus[0][0]);
+	//reader1->RawBoard(allBoardStatus[1][0]);
+	
 	//exit(0);
 
 	/*PGNToFENParser* parser = new PGNToFENParser();
 	parser->initializeInternalChessBoard();
 	parser->parsePGNToFEN(plays);
 	exit(0);*/
-
-	std::vector<std::vector<std::vector<int>>> arraygame
-	{
-		{
-			{TOWER, WHITE, A, 1},{HORSE, WHITE, B, 1},{BISHOP, WHITE, C, 1},{QUEEN, WHITE, D, 1},{KING, WHITE, E, 1},{BISHOP, WHITE, F, 1},{HORSE, WHITE, G, 1},{TOWER, WHITE, H, 1},
-			{PAWN, WHITE, A, 2},{PAWN, WHITE, B, 2},{PAWN, WHITE, C, 2},{PAWN, WHITE, D, 2},{PAWN, WHITE, E, 2},{PAWN, WHITE, F, 2},{PAWN, WHITE, G, 2},{PAWN, WHITE, H, 2},
-			{TOWER, BLACK, A, 8},{HORSE, BLACK, B, 8},{BISHOP, BLACK, C, 8},{KING, BLACK, D, 8},{QUEEN, BLACK, E, 8},{BISHOP, BLACK, F, 8},{HORSE, BLACK, G, 8},{TOWER, BLACK, H, 8},
-			{PAWN, BLACK, A, 7},{PAWN, BLACK, B, 7},{PAWN, BLACK, C, 7},{PAWN, BLACK, D, 7},{PAWN, BLACK, E, 7},{PAWN, BLACK, F, 7},{PAWN, BLACK, G, 7},{PAWN, BLACK, H, 7}
-		},
-		{
-			{TOWER, WHITE, A, 1},{HORSE, WHITE, B, 1},{BISHOP, WHITE, C, 1},{QUEEN, WHITE, D, 1},{KING, WHITE, E, 1},{BISHOP, WHITE, F, 1},{HORSE, WHITE, G, 1},{TOWER, WHITE, H, 1},
-			{PAWN, WHITE, A, 2},{PAWN, WHITE, B, 2},{PAWN, WHITE, C, 3},{PAWN, WHITE, D, 2},{PAWN, WHITE, E, 2},{PAWN, WHITE, F, 2},{PAWN, WHITE, G, 2},{PAWN, WHITE, H, 2},
-			{TOWER, BLACK, A, 8},{HORSE, BLACK, B, 8},{BISHOP, BLACK, C, 8},{KING, BLACK, D, 8},{QUEEN, BLACK, E, 8},{BISHOP, BLACK, F, 8},{HORSE, BLACK, G, 8},{TOWER, BLACK, H, 8},
-			{PAWN, BLACK, A, 7},{PAWN, BLACK, B, 7},{PAWN, BLACK, C, 7},{PAWN, BLACK, D, 7},{PAWN, BLACK, E, 7},{PAWN, BLACK, F, 7},{PAWN, BLACK, G, 7},{PAWN, BLACK, H, 7}
-		},
-		{
-			{TOWER, WHITE, A, 1},{HORSE, WHITE, B, 1},{BISHOP, WHITE, C, 1},{QUEEN, WHITE, D, 1},{KING, WHITE, E, 1},{BISHOP, WHITE, F, 1},{HORSE, WHITE, G, 1},{TOWER, WHITE, H, 1},
-			{PAWN, WHITE, A, 2},{PAWN, WHITE, B, 2},{PAWN, WHITE, C, 3},{PAWN, WHITE, D, 2},{PAWN, WHITE, E, 2},{PAWN, WHITE, F, 2},{PAWN, WHITE, G, 2},{PAWN, WHITE, H, 2},
-			{TOWER, BLACK, A, 8},{HORSE, BLACK, B, 8},{BISHOP, BLACK, C, 8},{KING, BLACK, D, 8},{QUEEN, BLACK, E, 8},{BISHOP, BLACK, F, 8},{HORSE, BLACK, G, 8},{TOWER, BLACK, H, 8},
-			{PAWN, BLACK, A, 7},{PAWN, BLACK, B, 7},{PAWN, BLACK, C, 7},{PAWN, BLACK, D, 7},{PAWN, BLACK, E, 6},{PAWN, BLACK, F, 7},{PAWN, BLACK, G, 7},{PAWN, BLACK, H, 7}
-		},
-		{
-			{TOWER, WHITE, A, 1},{HORSE, WHITE, B, 1},{BISHOP, WHITE, C, 1},{QUEEN, WHITE, D, 1},{KING, WHITE, E, 1},{BISHOP, WHITE, F, 1},{HORSE, WHITE, G, 1},{TOWER, WHITE, H, 1},
-			{PAWN, WHITE, A, 2},{PAWN, WHITE, B, 4},{PAWN, WHITE, C, 3},{PAWN, WHITE, D, 2},{PAWN, WHITE, E, 2},{PAWN, WHITE, F, 2},{PAWN, WHITE, G, 2},{PAWN, WHITE, H, 2},
-			{TOWER, BLACK, A, 8},{HORSE, BLACK, B, 8},{BISHOP, BLACK, C, 8},{KING, BLACK, D, 8},{QUEEN, BLACK, E, 8},{BISHOP, BLACK, F, 8},{HORSE, BLACK, G, 8},{TOWER, BLACK, H, 8},
-			{PAWN, BLACK, A, 7},{PAWN, BLACK, B, 7},{PAWN, BLACK, C, 7},{PAWN, BLACK, D, 7},{PAWN, BLACK, E, 6},{PAWN, BLACK, F, 7},{PAWN, BLACK, G, 7},{PAWN, BLACK, H, 7}
-		},	
-		{
-			{TOWER, WHITE, A, 1},{HORSE, WHITE, B, 1},{BISHOP, WHITE, C, 1},{QUEEN, WHITE, D, 1},{KING, WHITE, E, 1},{BISHOP, WHITE, F, 1},{HORSE, WHITE, G, 1},{TOWER, WHITE, H, 1},
-			{PAWN, WHITE, A, 2},{PAWN, WHITE, B, 4},{PAWN, WHITE, C, 3},{PAWN, WHITE, D, 2},{PAWN, WHITE, E, 2},{PAWN, WHITE, F, 2},{PAWN, WHITE, G, 2},{PAWN, WHITE, H, 2},
-			{TOWER, BLACK, A, 8},{HORSE, BLACK, B, 8},{BISHOP, BLACK, C, 8},{KING, BLACK, D, 8},{QUEEN, BLACK, E, 8},{BISHOP, BLACK, F, 8},{HORSE, BLACK, G, 8},{TOWER, BLACK, H, 8},
-			{PAWN, BLACK, A, 7},{PAWN, BLACK, B, 7},{PAWN, BLACK, C, 7},{PAWN, BLACK, D, 5},{PAWN, BLACK, E, 6},{PAWN, BLACK, F, 7},{PAWN, BLACK, G, 7},{PAWN, BLACK, H, 7}
-		},
-	};
 
 	//Inicializar GLFW y Opengl version 3.3
 	glfwInit();
@@ -301,6 +363,8 @@ int main() {
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
 		//Dibujamos tablero y piezas
+		controlPoints = reader1->compareBoards(allBoardStatus, i);
+		punts = draw_TFBSpline_Curve(controlPoints, 4, 0.05);
 		drawPieces(shaderProgram, camera, board, pawn, bishop, tower, horse, queen, king, testVector[i]);
 		updateBoard(window, i, testVector.size(), released);
 		//Intercambio de buffers
