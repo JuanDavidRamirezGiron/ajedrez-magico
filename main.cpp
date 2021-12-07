@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include <cstdio>
 #include"Model.h"
+#include"Menu.h"
+
 #define PAWN 1
 #define BISHOP 2
 #define TOWER 3
@@ -274,7 +276,7 @@ int main() {
 	//Creamos los modelos y la c�mara
 	//Creamos los modelos y la c�mara
 	Camera camera(width, height, glm::vec3(3.6341f, 22.8766f, 1.2473f), glm::vec3(-0.1339f, -0.9960f, -0.0002f), glm::vec3(0.0000f, 1.0000f, 0.0000f));
-	Model board("models/board_2.obj");
+	Model board("models/board.obj");
 	Model pawn("models/pawn.obj");
 	Model bishop("models/bishop.obj");
 	Model tower("models/tower.obj");
@@ -290,12 +292,20 @@ int main() {
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
+	//Creamos la intefície de usuario
+	Menu menu(window);
+
+
 	while (!glfwWindowShouldClose(window)) {
 
 		// Ajustamos color barrido
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		//Inicializamos el menú 
+		menu.init(camera);
+
+		
 		//Controlamos inputs para la camara
 		camera.Inputs(window);
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
@@ -307,6 +317,9 @@ int main() {
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+	//Destruimo el menú
+	menu.shutDown();
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
