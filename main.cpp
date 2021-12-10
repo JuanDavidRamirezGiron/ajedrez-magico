@@ -5,13 +5,9 @@
 #include <Windows.h>
 #include <cstdio>
 #include"Model.h"
-<<<<<<< HEAD
 #include"Menu.h"
 
-=======
-
 //piezas
->>>>>>> de7366febe8f606cf6d2716545401bbd63779297
 #define PAWN 1
 #define BISHOP 2
 #define TOWER 3
@@ -376,14 +372,11 @@ int main() {
 	//variables para cambio de jugada
 	bool released = true;
 	int i = 0;
-
-<<<<<<< HEAD
 	//Creamos la intefície de usuario
 	Menu menu(window);
 
 
 	while (!glfwWindowShouldClose(window)) {
-=======
 	// SHADOW MAPPING
 	// -----------------------
 	unsigned int depthMapFBO;
@@ -411,7 +404,6 @@ int main() {
 	shaderProgram.Activate();
 	glUniform1i(glGetUniformLocation(shaderProgram.ID, "diffuse0"), 0);
 	glUniform1i(glGetUniformLocation(shaderProgram.ID, "shadowMap"), 1);
->>>>>>> de7366febe8f606cf6d2716545401bbd63779297
 
 	
 
@@ -420,7 +412,6 @@ int main() {
 		
 		// Ajustamos color barrido
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-<<<<<<< HEAD
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Inicializamos el menú 
@@ -428,8 +419,6 @@ int main() {
 
 		
 		//Controlamos inputs para la camara
-=======
->>>>>>> de7366febe8f606cf6d2716545401bbd63779297
 		camera.Inputs(window);
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
