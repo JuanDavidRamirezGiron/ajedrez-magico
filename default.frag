@@ -1,6 +1,5 @@
 #version 330 core
 
-// Outputs colors in RGBA
 out vec4 FragColor;
 
 in vec3 crntPos;
@@ -19,30 +18,49 @@ uniform mat4 depthMVP;
 
 void main()
 {
-	// ambient lighting
+	// luz ambiente
 	float ambient = 0.4f;
 
-	// diffuse lighting
+	// luz difusa
 	vec3 normal = normalize(Normal);
-	vec3 lightDirection = normalize(vec3(0.9f, 1.0f, 0.8f));
+	vec3 lightDirection = normalize(lightPos);
 	float diffuse = max(dot(normal, lightDirection), 0.0f);
 	
-	// specular lighting 
+	// luz especular 
 	float specularLight = 0.9f;
 	vec3 viewDirection = normalize(camPos - crntPos);
 	vec3 reflectionDirection = reflect(-lightDirection, normal);
 	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
 	float specular = specAmount * specularLight;
 
-	//calculate shadows
-	vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
-    projCoords = projCoords * 0.5 + 0.5;
-    float closestDepth = texture(shadowMap, projCoords.xy).r; 
-    float currentDepth = projCoords.z;
-    float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
-	
-	//final texture
-	FragColor = texture (diffuse0, texCoord) * ((diffuse + specular) * shadow + ambient) * lightColor;
-	//FragColor = vec4(currentDepth);
-}
+	//sombras
+	float shadow = 0.0f;
+	// Sets lightCoords to cull space
+	vec3 lightCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
+	if(lightCoords.z <= 1.0f)
+	{
+		// Get from [-1, 1] range to [0, 1] range just like the shadow map
+		lightCoords = (lightCoords + 1.0f) / 2.0f;
+		float currentDepth = lightCoords.z;
+		// Prevents shadow acne
+		float bias = max(0.025f * (1.0f - dot(normal, lightDirection)), 0.0005f);
 
+		// Smoothens out the shadows
+		int sampleRadius = 2;
+		vec2 pixelSize = 1.0 / textureSize(shadowMap, 0);
+		for(int y = -sampleRadius; y <= sampleRadius; y++)
+		{
+		    for(int x = -sampleRadius; x <= sampleRadius; x++)
+		    {
+		        float closestDepth = texture(shadowMap, lightCoords.xy + vec2(x, y) * pixelSize).r;
+				if (currentDepth > closestDepth + bias)
+					shadow += 1.0f;     
+		    }    
+		}
+		// Get average shadow
+		shadow /= pow((sampleRadius * 2 + 1), 2);
+	}
+	
+	//calculo del color
+	FragColor = texture (diffuse0, texCoord) * ((diffuse + specular) * (1-shadow) + ambient) * lightColor; 
+}

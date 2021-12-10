@@ -7,7 +7,6 @@ uniform sampler2D depthMap;
 
 void main()
 {             
+	//profundidad = componente z desde el pov de la camara
 	gl_FragDepth = gl_FragCoord.z;
-	//FragColor = vec4(gl_FragCoord.z);
-
 }  
