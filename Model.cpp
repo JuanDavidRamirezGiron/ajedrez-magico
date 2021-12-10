@@ -3,6 +3,8 @@
 Model::Model(const char* filename){
 	loadModel(filename);
 }
+Model::Model() {
+}
 
 void Model::Draw(Shader& shader, Camera& camera, glm::vec3 translation, GLfloat rdeg, glm::vec3 raxis, glm::vec3 escalation){
 	for (unsigned int i = 0; i < meshes.size(); i++)

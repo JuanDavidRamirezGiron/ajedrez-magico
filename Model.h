@@ -3,6 +3,7 @@
 class Model {
 public:
 	Model(const char* filename);
+	Model();
 	void Draw(Shader& shader, Camera& camera, glm::vec3 translation, GLfloat rdeg, glm::vec3 raxis, glm::vec3 escalation);
 	int loadModel(const char* filename);
 private:

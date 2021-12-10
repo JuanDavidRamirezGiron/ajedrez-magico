@@ -42,29 +42,27 @@ vector<glm::vec3> Movements::compareBoards(vector<vector<vector<char>>> allBoard
 	vector<vector<char>> matrizJugada = allBoardStatus[position];
 	vector<vector<char>> matrizFinal = allBoardStatus[position + 1];
 	vector<glm::vec3> puntosControl;
-	int posiniI = 0;
-	int posiniJ = 0;
-	int posFiI = 0;
-	int posFiJ = 0;
+	int primerpieceX = 0;
+	int primerpieceZ = 0;
+	int segundopieceX = 0;
+	int segundopieceZ = 0;
 	int i = 0;
 	int j = 0;
 	while ((iguals || iguals1) && i < matrizJugada.size()) {
-		j = 0;
+		j = 1;
 		while ((iguals1 || iguals) && j < matrizJugada[i].size())
 		{
 			if (matrizJugada[i][j] != matrizFinal[i][j])
 			{
 				if (iguals1) {
 					iguals1 = false;
-					float pieceX = originX + i * cellSize;
-					float pieceZ = originZ - j * cellSize;
-					puntosControl.push_back({pieceX, 0, pieceZ});
+					primerpieceX = originX + (i+1) * cellSize;
+					primerpieceZ = originZ - (j+1) * cellSize;
 				}
 				else{
 					iguals = false;
-					int pieceX = originX + i * cellSize;
-					int pieceZ = originZ - j * cellSize;
-					puntosControl.push_back({ pieceX, 0, pieceZ });
+					segundopieceX = originX + (i+1) * cellSize;
+					segundopieceZ = originZ - (j+1) * cellSize;
 				}
 			}
 			
@@ -73,5 +71,40 @@ vector<glm::vec3> Movements::compareBoards(vector<vector<vector<char>>> allBoard
 		i++;
 
 	}
+	
+	if (position % 2 == 0)
+	{
+		float distanceX = segundopieceX - primerpieceX;
+		float distanceZ = segundopieceZ;
+		float distanceZ1 = distanceZ;
+		float distanceZ2 = distanceZ;
+		if (segundopieceZ != primerpieceZ)
+		{
+			float distanceZ = segundopieceZ - primerpieceZ;
+			float distanceZ1 = distanceZ * 1.0f / 3;
+			float distanceZ2 = distanceZ * 2.0f / 3;
+		}
+		puntosControl.push_back({ primerpieceX, 0, primerpieceZ });
+		puntosControl.push_back({ primerpieceX + (distanceX * 1.0f / 3), 3, distanceZ1 });
+		puntosControl.push_back({ primerpieceX + (distanceX * 2.0f / 3), 3, distanceZ2 });
+		puntosControl.push_back({ segundopieceX, 0, segundopieceZ });
+	}
+	else {
+		float distanceX = primerpieceX - segundopieceX;
+		float distanceZ = segundopieceZ;
+		float distanceZ1 = distanceZ;
+		float distanceZ2 = distanceZ;
+		if (segundopieceZ != primerpieceZ)
+		{
+			float distanceZ = segundopieceZ - primerpieceZ;
+			float distanceZ1 = distanceZ * 1.0f / 3;
+			float distanceZ2 = distanceZ * 2.0f / 3;
+		}
+		puntosControl.push_back({ segundopieceX, 0, segundopieceZ });
+		puntosControl.push_back({ primerpieceX + (distanceX * 1.0f / 3), 3, distanceZ1});
+		puntosControl.push_back({ primerpieceX + (distanceX * 2.0f / 3), 3, distanceZ2});
+		puntosControl.push_back({ primerpieceX, 0, primerpieceZ });
+	}
+
 	return puntosControl;
 }
