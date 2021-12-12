@@ -3,27 +3,36 @@
 vector<vector<vector<char>>> FENFileReader::prepareBoard()
 {
 	vector<vector<vector<char>>> allBoardStatus;
+	vector<vector<char>> initialStatus = {
+		{'R','N','B','Q','K','B','N','R'},
+		{'P','P','P','P','P','P','P','P'},
+		{'1','1','1','1','1','1','1','1'},
+		{'1','1','1','1','1','1','1','1'},
+		{'1','1','1','1','1','1','1','1'},
+		{'1','1','1','1','1','1','1','1'},
+		{'p','p','p','p','p','p','p','p'},
+		{'r','n','b','q','k','b','n','r'},
+	};
+
+	
 
 	ifstream file(this->filename);
 
 	if (file.is_open()) 
 	{
 		string line;
+		allBoardStatus.push_back(initialStatus);
 		
 		while (getline(file, line)) 
 		{
 			
 			string plays = retrievePlays(line);
 
-			
-			
 			vector<string> rawBoard = generateRawBoard(plays);
 			//printRawBoard(rawBoard);
 			vector<vector<char>> transformedBoard = transformRawBoard(rawBoard);
 			
 			allBoardStatus.push_back(transformedBoard);
-			
-
 		}
 	}
 
@@ -36,7 +45,6 @@ vector<vector<vector<char>>> FENFileReader::prepareBoard()
 
 string FENFileReader::retrievePlays(string line)
 {
-
 	string delimiter = " ";
 	string plays = line.substr(0, line.find(delimiter));
 

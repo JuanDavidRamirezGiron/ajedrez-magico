@@ -1,6 +1,7 @@
 #include "PGNFileReader.h"
 #include "PGNToFENParser.h"
 #include "FENFileReader.h"
+#include "StatusToPlaysTransformer.h"
 #include "movements.h"
 #include <Windows.h>
 #include <cstdio>
@@ -68,6 +69,12 @@ glm::vec3 Punt_Corba_BSpline(float t, glm::vec3* ctr)
 		p.y += coef[i] * ctr[i].y;
 		p.z += coef[i] * ctr[i].z;
 	}
+	
+	p.x *= 5;
+	p.y *= 5;
+	p.z *= 5;
+	
+	
 	return p;
 
 }
@@ -84,10 +91,17 @@ vector<glm::vec3> draw_TFBSpline_Curve(vector<glm::vec3> ctr_points, int nptsCor
 // Càrrega primers punts de control.
 	for (int i = 0; i < 4; i++)
 	{
+		float aux = ctr_points[i].y;
+		ctr_points[i].y = ctr_points[i].z;
+		ctr_points[i].z = -aux;
+
 		ctr[i].x = ctr_points[i].x;
 		ctr[i].y = ctr_points[i].y;
 		ctr[i].z = ctr_points[i].z;
+
 	}
+
+
 
 	// Càlcul i dibuix Triedre de Frenet en cada vèrtex de la corba B-Spline
 	vertexL1 = Punt_Corba_BSpline(t, ctr);
@@ -120,9 +134,6 @@ vector<glm::vec3> draw_TFBSpline_Curve(vector<glm::vec3> ctr_points, int nptsCor
 	return puntsCorba;
 }
 
-
-
-
 void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model board, Model pawn, Model bishop, Model tower, Model horse, Model queen, Model king, std::vector<std::vector<int>> arraygame, vector<glm::vec3> controlPoints) {
 
 	const int originX = -9;
@@ -142,6 +153,7 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 		
 		if (pieceX == controlPoints[3].x && pieceZ == controlPoints[3].z)
 		{
+			
 			translationPiece = piece;
 			continue;
 		}
@@ -174,7 +186,6 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 
 }
 
-
 void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<glm::vec3> controlPoints) {
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && i < size - 1 && released)
 	{
@@ -188,11 +199,10 @@ void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<gl
 	}
 	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE && !released && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
 	{
-		punts = draw_TFBSpline_Curve(controlPoints, 4, 0.05);
+		punts = draw_TFBSpline_Curve(controlPoints, 4, 0.005);
 		released = true;
 	}
 }
-
 
 int main() {
 
@@ -201,131 +211,29 @@ int main() {
 
 	cout << "Empieza la lectura del programa" << endl;
 
+	//PGN Reader, not finished
 	/*PGNFileReader* reader = new PGNFileReader("Jugadas.pgn");
 
 	map<int, pair<string, string>> plays;
 
 	plays = reader->gatherInformation();*/
 
+	//FFEL files reader
 	FENFileReader* reader = new FENFileReader("Jugadas.fen");
 	Movements* reader1 = new Movements;
 
 	vector<vector<vector<char>>> allBoardStatus;
 
+	
+	//FENReader returns all boards read form the file
 	allBoardStatus = reader->prepareBoard();
 
+	StatusToPlaysTransformer* transformer = new StatusToPlaysTransformer();
+	vector<vector<vector<int>>> allPlays;
+	allPlays = transformer->transformStatusToPlays(allBoardStatus);
 
-	int count = 0;
-	vector<vector<vector<int>>> testVector;
-	vector<vector<int>> outerVector;
-	vector<int> auxVector;
 	vector<glm::vec3> controlPoints;
 
-	for (vector<vector<char>> boards : allBoardStatus)
-	{
-
-		outerVector.clear();
-		auxVector.clear();
-
-		for (size_t row = 0; row < boards.size(); row++)
-		{
-
-			for (size_t col = 0; col < boards[row].size(); col++)
-			{
-				char currentPiece = boards[row][col];
-
-				if (!isdigit(currentPiece)) {
-					//cout << "Count:" << count << endl;
-					//cout << "Pieza es: " << boards[row][col] << endl;
-					//count++;
-
-					if (isupper(currentPiece)) {
-
-						switch (currentPiece) {
-						case 'R':
-							auxVector = { TOWER, WHITE, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-
-							break;
-						case 'N':
-							auxVector = { HORSE, WHITE, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-							break;
-						case 'B':
-							auxVector = { BISHOP, WHITE, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-							break;
-						case 'Q':
-							auxVector = { QUEEN, WHITE, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-							break;
-						case 'K':
-							auxVector = { KING, WHITE, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-							break;
-						case 'P':
-							auxVector = { PAWN, WHITE, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-							break;
-						}
-
-					}
-					else {
-
-						switch (currentPiece) {
-						case 'r':
-							auxVector = { TOWER, BLACK, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-							break;
-						case 'n':
-							auxVector = { HORSE, BLACK, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-							break;
-						case 'b':
-							auxVector = { BISHOP, BLACK, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-							break;
-						case 'q':
-							auxVector = { QUEEN, BLACK, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-							break;
-						case 'k':
-							auxVector = { KING, BLACK, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-							break;
-						case 'p':
-							auxVector = { PAWN, BLACK, (int)row + 1, (int)col + 1 };
-							outerVector.push_back(auxVector);
-							break;
-						}
-
-					}
-
-				}
-
-			}
-
-		}
-
-		testVector.push_back(outerVector);
-
-
-	}
-
-	
-
-	//reader->printTransformedBoard(allBoardStatus[0]);
-
-	//reader->printAllBoardStatus(allBoardStatus);
-	//reader1->RawBoard(allBoardStatus[0][0]);
-	//reader1->RawBoard(allBoardStatus[1][0]);
-	
-	//exit(0);
-
-	/*PGNToFENParser* parser = new PGNToFENParser();
-	parser->initializeInternalChessBoard();
-	parser->parsePGNToFEN(plays);
-	exit(0);*/
 
 	//Inicializar GLFW y Opengl version 3.3
 	glfwInit();
@@ -381,137 +289,112 @@ int main() {
 
 	//variables para cambio de jugada
 	bool released = true;
-	int i = 0;
+	int currentPlay = 0;
+	int translationIndex = 0;
 	//Creamos la intefície de usuario
-	Menu menu(window);
+	//Menu menu(window);
 
+	// SHADOW MAPPING
+	// -----------------------
+	unsigned int depthMapFBO;
+	glGenFramebuffers(1, &depthMapFBO);
+
+	// creamos la depthtexture
+	unsigned int depthMap;
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// unimos el depth buffer con la textura
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	// pasasmos las texturas (normal y shadowmap) al shader 
+	shaderProgram.Activate();
+	glUniform1i(glGetUniformLocation(shaderProgram.ID, "diffuse0"), 0);
+	glUniform1i(glGetUniformLocation(shaderProgram.ID, "shadowMap"), 1);
+
+
+	double previousTime = glfwGetTime();
+	controlPoints = reader1->compareBoards(allBoardStatus, currentPlay);
 
 	while (!glfwWindowShouldClose(window)) {
-		// SHADOW MAPPING
-		// -----------------------
-		unsigned int depthMapFBO;
-		glGenFramebuffers(1, &depthMapFBO);
 
-		// creamos la depthtexture
-		unsigned int depthMap;
-		glGenTextures(1, &depthMap);
-		glBindTexture(GL_TEXTURE_2D, depthMap);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		// Ajustamos color barrido
+		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// unimos el depth buffer con la textura
+		//Inicializamos el menú 
+		//menu.init(camera);
+
+
+		//Controlamos inputs para la camara
+		camera.Inputs(window);
+		camera.updateMatrix(45.0f, 0.1f, 100.0f);
+
+		// renderizado desde el punto de vista de la luz (para sombras)
+		simpleDepthShader.Activate();
+		glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+		glViewport(0, 0, width, height);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		
+		drawPieces(window, simpleDepthShader, camera, board, pawn, bishop, tower, horse, queen, king, allPlays[currentPlay], controlPoints);
+
+		// Renderizado normal de la escena
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-		// pasasmos las texturas (normal y shadowmap) al shader 
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		shaderProgram.Activate();
-		glUniform1i(glGetUniformLocation(shaderProgram.ID, "diffuse0"), 0);
-		glUniform1i(glGetUniformLocation(shaderProgram.ID, "shadowMap"), 1);
-
-
-
-		int i = 0;
-		float previousTime = glfwGetTime();
-		while (!glfwWindowShouldClose(window)) {
-
-			// Ajustamos color barrido
-			glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			//Inicializamos el menú 
-			menu.init(camera);
-
-
-			//Controlamos inputs para la camara
-			camera.Inputs(window);
-			camera.updateMatrix(45.0f, 0.1f, 100.0f);
-
-			// renderizado desde el punto de vista de la luz (para sombras)
-			simpleDepthShader.Activate();
-			glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
-			glViewport(0, 0, width, height);
-			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-			glClear(GL_DEPTH_BUFFER_BIT);
-			glActiveTexture(GL_TEXTURE0);
-			controlPoints = reader1->compareBoards(allBoardStatus, i);
-			drawPieces(window, simpleDepthShader, camera, board, pawn, bishop, tower, horse, queen, king, testVector[i], controlPoints);
-
-			// Renderizado normal de la escena
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			shaderProgram.Activate();
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, depthMap);
-			glUniform1i(glGetUniformLocation(shaderProgram.ID, "depthMap"), 1);
-			glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
-			//Dibujamos tablero y piezas
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+		glUniform1i(glGetUniformLocation(shaderProgram.ID, "depthMap"), 1);
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+		//Dibujamos tablero y piezas
 			
 			
-			drawPieces(window, shaderProgram, camera, board, pawn, bishop, tower, horse, queen, king, testVector[i], controlPoints);
+		drawPieces(window, shaderProgram, camera, board, pawn, bishop, tower, horse, queen, king, allPlays[currentPlay], controlPoints);
 
 			
-			
-			
-			
-			float currentTime = glfwGetTime();
-			
-			if (i < punts.size()-1 && (currentTime - previousTime) >= 5) {
+		double currentTime = glfwGetTime();
+		
+		if ((currentTime - previousTime) >= 1) {
 				
-				
-				previousTime = currentTime;
-				
-				i++;
-			}
-			
-			int pieceX = punts[i].x;
-			int pieceY = punts[i].y;
-			int pieceZ = punts[i].z;
+			translationIndex = translationIndex == punts.size() - 1 ? 0 : translationIndex + 1;
 
-			glm::vec3 pieceZoom = glm::vec3(0.2f, 0.2f, 0.2f);
-			glm::vec3 pieceRotation = glm::vec3(1.f, 0.f, 0.f);
-			switch (translationPiece[0])
-			{
-			case PAWN:
-				pawn.Draw(shaderProgram, camera, glm::vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
-				break;
-			case BISHOP:
-				bishop.Draw(shaderProgram, camera, glm::vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
-				break;
-			case TOWER:
-				tower.Draw(shaderProgram, camera, glm::vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
-				break;
-			case HORSE:
-				horse.Draw(shaderProgram, camera, glm::vec3(pieceX, pieceY, pieceZ), 00.f, pieceRotation, pieceZoom);
-				break;
-			case QUEEN:
-				queen.Draw(shaderProgram, camera, glm::vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
-				break;
-			case KING:
-				king.Draw(shaderProgram, camera, glm::vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
-				break;
-			default:
-				break;
-			}
-
-			// actualizacion e intercambio de buffers
-			updateBoard(window, i, testVector.size(), released, controlPoints);
-			glfwSwapBuffers(window);
-			glfwPollEvents();
+			previousTime = currentTime;
+				
 		}
+			
+		int pieceX = punts[translationIndex].x;
+		int pieceY = punts[translationIndex].y;
+		int pieceZ = punts[translationIndex].z;
 
-		//Destruimo el menú
-		menu.shutDown();
+		glm::vec3 pieceZoom = glm::vec3(0.2f, 0.2f, 0.2f);
+		glm::vec3 pieceRotation = glm::vec3(1.f, 0.f, 0.f);
 
-		glfwDestroyWindow(window);
-		glfwTerminate();
-		return 0;
+		pawn.Draw(shaderProgram, camera, glm::vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+
+		// actualizacion e intercambio de buffers
+		updateBoard(window, currentPlay, allPlays.size(), released, controlPoints);
+		glfwSwapBuffers(window);
+		glfwPollEvents();
 	}
+
+	//Destruimo el menú
+	//menu.shutDown();
+
+	glfwDestroyWindow(window);
+	glfwTerminate();
+	return 0;
+	
 }
 

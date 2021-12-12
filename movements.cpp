@@ -100,7 +100,7 @@ vector<glm::vec3> Movements::compareBoards(vector<vector<vector<char>>> allBoard
 			float distanceZ1 = distanceZ * 1.0f / 3;
 			float distanceZ2 = distanceZ * 2.0f / 3;
 		}
-		puntosControl.push_back({ segundopieceX, 0, segundopieceZ });
+		puntosControl.push_back({ segundopieceX, 0, segundopieceZ }  );
 		puntosControl.push_back({ primerpieceX + (distanceX * 1.0f / 3), 3, distanceZ1});
 		puntosControl.push_back({ primerpieceX + (distanceX * 2.0f / 3), 3, distanceZ2});
 		puntosControl.push_back({ primerpieceX, 0, primerpieceZ });
