@@ -8,6 +8,9 @@
 #include "Model.h"
 #include "Menu.h"
 
+
+using namespace glm;
+
 //piezas
 #define PAWN 1
 #define BISHOP 2
@@ -27,7 +30,7 @@
 #define H 8
 
 vector<int> translationPiece;
-vector<glm::vec3> punts = { {0,0,0}, {0,0,0} };
+vector<vec3> punts = { {0,0,0}, {0,0,0} };
 
 
 #define WHITE true
@@ -39,7 +42,7 @@ const unsigned int height = 1080; //720
 
 // Punt_Corba_Spline: Calcul del punt del spline en coordenades 3D (CPunt3D) segons el 
 //             paràmetre i i els punts de control ctr 
-glm::vec3 Punt_Corba_BSpline(float t, glm::vec3* ctr)
+vec3 Punt_Corba_BSpline(float t, vec3* ctr)
 {
 	// Matriu dels Splines
 	const double AS[4][4] =
@@ -50,7 +53,7 @@ glm::vec3 Punt_Corba_BSpline(float t, glm::vec3* ctr)
 		{ 1.0 / 6.0, 0.0, 0.0, 0.0 }
 	};
 
-	glm::vec3 p = { 0, 0, 0 };
+	vec3 p = { 0, 0, 0 };
 	float coef[4];
 	int i, j;
 
@@ -79,13 +82,13 @@ glm::vec3 Punt_Corba_BSpline(float t, glm::vec3* ctr)
 
 }
 
-vector<glm::vec3> draw_TFBSpline_Curve(vector<glm::vec3> ctr_points, int nptsCorba, float pas)
+vector<vec3> draw_TFBSpline_Curve(vector<vec3> ctr_points, int nptsCorba, float pas)
 {
-	glm::vec3 vertexL1, vertexL2;
-	glm::vec3 ctr[4];		// Punts control del patch de la B-Spline.
+	vec3 vertexL1, vertexL2;
+	vec3 ctr[4];		// Punts control del patch de la B-Spline.
 	int patch = 0;		// Patch actual.
 	GLfloat t = 0;
-	vector<glm::vec3> puntsCorba;
+	vector<vec3> puntsCorba;
 
 	//t = t - pas;
 // Càrrega primers punts de control.
@@ -134,16 +137,16 @@ vector<glm::vec3> draw_TFBSpline_Curve(vector<glm::vec3> ctr_points, int nptsCor
 	return puntsCorba;
 }
 
-void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model board, Model pawn, Model bishop, Model tower, Model horse, Model queen, Model king, std::vector<std::vector<int>> arraygame, vector<glm::vec3> controlPoints) {
+void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model board, Model pawn, Model bishop, Model tower, Model horse, Model queen, Model king, std::vector<std::vector<int>> arraygame, vector<vec3> controlPoints) {
 
 	const int originX = -9;
 	const int originZ = 10;
 	const int cellSize = 2;
-	glm::vec3 pieceZoom = glm::vec3(0.2f, 0.2f, 0.2f);
-	glm::vec3 pieceRotation = glm::vec3(1.f, 0.f, 0.f);
+	vec3 pieceZoom = vec3(0.2f, 0.2f, 0.2f);
+	vec3 pieceRotation = vec3(1.f, 0.f, 0.f);
 
 	//Dibujamos el tablero
-	board.Draw(shaderProgram, camera, glm::vec3(0.0f, -1.9f, 0.0f), 1.5708f, glm::vec3(1.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f));
+	board.Draw(shaderProgram, camera, vec3(0.0f, -1.9f, 0.0f), 1.5708f, vec3(1.f, 0.f, 0.f), vec3(1.f, 1.f, 1.f));
 
 	//Iteramos en el vector de posiciones de piezas
 	for (auto piece : arraygame) {
@@ -160,22 +163,22 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 		switch (piece[0])
 		{
 		case PAWN:
-			pawn.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			pawn.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case BISHOP:
-			bishop.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			bishop.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case TOWER:
-			tower.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			tower.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case HORSE:
-			horse.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 00.f, pieceRotation, pieceZoom);
+			horse.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 00.f, pieceRotation, pieceZoom);
 			break;
 		case QUEEN:
-			queen.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			queen.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case KING:
-			king.Draw(shaderProgram, camera, glm::vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			king.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		default:
 			break;
@@ -186,7 +189,7 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 
 }
 
-void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<glm::vec3> controlPoints) {
+void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints) {
 	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && i < size - 1 && released)
 	{
 		released = false;
@@ -204,6 +207,20 @@ void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<gl
 	}
 }
 
+void setOpenGLVersion() {
+
+	//Inicializar GLFW y Opengl version 3.3
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+}
+
+void shaderloader() {
+
+}
+
 int main() {
 
 	SetConsoleOutputCP(CP_UTF8);
@@ -218,13 +235,12 @@ int main() {
 
 	plays = reader->gatherInformation();*/
 
-	//FFEL files reader
+	//FEN files reader
 	FENFileReader* reader = new FENFileReader("Jugadas.fen");
 	Movements* reader1 = new Movements;
 
 	vector<vector<vector<char>>> allBoardStatus;
 
-	
 	//FENReader returns all boards read form the file
 	allBoardStatus = reader->prepareBoard();
 
@@ -232,17 +248,12 @@ int main() {
 	vector<vector<vector<int>>> allPlays;
 	allPlays = transformer->transformStatusToPlays(allBoardStatus);
 
-	vector<glm::vec3> controlPoints;
+	vector<vec3> controlPoints;
 
-
-	//Inicializar GLFW y Opengl version 3.3
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	setOpenGLVersion();
 
 	//creamos ventana
-	GLFWwindow* window = glfwCreateWindow(width, height, "Chess Reproducer", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, "Chess Player", NULL, NULL);
 	if (window == NULL) {
 		std::cout << "Error al crear GLFW window" << std::endl;
 		return -1;
@@ -262,7 +273,7 @@ int main() {
 	Shader simpleDepthShader("simpleDepthShader.vert", "simpleDepthShader.frag");
 	
 	//Creamos los modelos y la camara
-	Camera camera(width, height, glm::vec3(3.6341f, 22.8766f, 1.2473f), glm::vec3(-0.1339f, -0.9960f, -0.0002f), glm::vec3(0.0000f, 1.0000f, 0.0000f));
+	Camera camera(width, height, vec3(3.6341f, 22.8766f, 1.2473f), vec3(-0.1339f, -0.9960f, -0.0002f), vec3(0.0000f, 1.0000f, 0.0000f));
 	Model board("models/board.obj");
 	Model pawn("models/pawn.obj");
 	Model bishop("models/bishop.obj");
@@ -273,19 +284,19 @@ int main() {
 	
 	
 	//Color y posición de la luz para shaders
-	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	glm::vec3 lightPos = glm::vec3(-2.0f, 4.0f, -1.0f);
+	vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	vec3 lightPos = vec3(-2.0f, 4.0f, -1.0f);
 	shaderProgram.Activate();
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 	
 	float near_plane = 1.0f, far_plane = 150.0f;
-	glm::mat4 lightProjection = glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, near_plane, far_plane);
-	glm::mat4 lightView = glm::lookAt(
+	mat4 lightProjection = ortho(-15.0f, 15.0f, -15.0f, 15.0f, near_plane, far_plane);
+	mat4 lightView = lookAt(
 		lightPos,
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f));
-	glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+		vec3(0.0f, 0.0f, 0.0f),
+		vec3(0.0f, 1.0f, 0.0f));
+	mat4 lightSpaceMatrix = lightProjection * lightView;
 
 	//variables para cambio de jugada
 	bool released = true;
@@ -342,7 +353,7 @@ int main() {
 
 		// renderizado desde el punto de vista de la luz (para sombras)
 		simpleDepthShader.Activate();
-		glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader.ID, "lightSpaceMatrix"), 1, GL_FALSE, value_ptr(lightSpaceMatrix));
 		glViewport(0, 0, width, height);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
@@ -357,7 +368,7 @@ int main() {
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
 		glUniform1i(glGetUniformLocation(shaderProgram.ID, "depthMap"), 1);
-		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightSpaceMatrix"), 1, GL_FALSE, value_ptr(lightSpaceMatrix));
 		//Dibujamos tablero y piezas
 			
 			
@@ -378,10 +389,10 @@ int main() {
 		int pieceY = punts[translationIndex].y;
 		int pieceZ = punts[translationIndex].z;
 
-		glm::vec3 pieceZoom = glm::vec3(0.2f, 0.2f, 0.2f);
-		glm::vec3 pieceRotation = glm::vec3(1.f, 0.f, 0.f);
+		vec3 pieceZoom = vec3(0.2f, 0.2f, 0.2f);
+		vec3 pieceRotation = vec3(1.f, 0.f, 0.f);
 
-		pawn.Draw(shaderProgram, camera, glm::vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		pawn.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 
 		// actualizacion e intercambio de buffers
 		updateBoard(window, currentPlay, allPlays.size(), released, controlPoints);
