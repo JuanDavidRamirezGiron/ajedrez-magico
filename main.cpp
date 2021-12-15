@@ -9,12 +9,13 @@
 #include "Menu.h"
 #include <chrono>
 #include <thread>
+#include "Skybox.h"
 
 
 using namespace glm;
 
 void setOpenGLVersion();
-void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, bool autoPlay);
+void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, bool autoPlay, float& angle);
 void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model board, Model pawn, Model bishop, Model tower, Model horse, Model queen, Model king, std::vector<std::vector<int>> arraygame, vector<vec3> controlPoints);
 vector<vec3> draw_TFBSpline_Curve(vector<vec3> ctr_points, int nptsCorba, float pas);
 vec3 Punt_Corba_BSpline(float t, vec3* ctr);
@@ -85,6 +86,7 @@ int main() {
 	//Cargamos shaders
 	Shader shaderProgram("default.vert", "default.frag");
 	Shader simpleDepthShader("simpleDepthShader.vert", "simpleDepthShader.frag");
+	Shader skyboxShader("skyboxShader.vert", "skyboxShader.frag");
 	
 	//Creamos los modelos y la camara
 	Camera camera(width, height, vec3(3.6341f, 22.8766f, 1.2473f), vec3(-0.1339f, -0.9960f, -0.0002f), vec3(0.0000f, 1.0000f, 0.0000f));
@@ -95,36 +97,32 @@ int main() {
 	Model horse("models/horse.obj");
 	Model queen("models/queen.obj");
 	Model king("models/king.obj");
+	Skybox skybox(skyboxShader);
 	
 	
 	//Color y posición de la luz para shaders
+	//TODO Mirar sombra casilla [0]-[1]
+	float near_plane = 1.0f, far_plane = 20.0f;
 	vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	vec3 lightPos = vec3(-2.0f, 4.0f, -1.0f);
+	vec3 og_lightPos =vec3(-5.0f, 5.0f, 0.0f);
+	vec3 lightPos = og_lightPos;
+	mat4 lightProjection = ortho(-15.0f, 15.0f, -15.0f, 15.0f, near_plane, far_plane);
+	
 	shaderProgram.Activate();
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
-	glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 	
-	float near_plane = 1.0f, far_plane = 150.0f;
-	mat4 lightProjection = ortho(-15.0f, 15.0f, -15.0f, 15.0f, near_plane, far_plane);
-	mat4 lightView = lookAt(
-		lightPos,
-		vec3(0.0f, 0.0f, 0.0f),
-		vec3(0.0f, 1.0f, 0.0f));
-	mat4 lightSpaceMatrix = lightProjection * lightView;
-
 	//variables para cambio de jugada
 	bool released = true;
 	int currentPlay = 0;
 	int translationIndex = 0;
-	//Creamos la intefície de usuario
-	//Menu menu(window);
+	float angle = 180;
 
-	// SHADOW MAPPING
-	// -----------------------
+	//Creamos la intefície de usuario
+	Menu menu(window);
+
 	unsigned int depthMapFBO;
 	glGenFramebuffers(1, &depthMapFBO);
-
-	// creamos la depthtexture
+	
 	unsigned int depthMap;
 	glGenTextures(1, &depthMap);
 	glBindTexture(GL_TEXTURE_2D, depthMap);
@@ -133,7 +131,7 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
+	
 	// unimos el depth buffer con la textura
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
@@ -141,17 +139,21 @@ int main() {
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
-	// pasasmos las texturas (normal y shadowmap) al shader 
 	shaderProgram.Activate();
 	glUniform1i(glGetUniformLocation(shaderProgram.ID, "diffuse0"), 0);
 	glUniform1i(glGetUniformLocation(shaderProgram.ID, "shadowMap"), 1);
 
-
+	skyboxShader.Activate();
+	camera.updateMatrix(45.0f, 0.1f, 100.0f);
+	glm::mat4 projection = camera.getProjection();
+	glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	
+	//Mover piezas
 	double previousTime = glfwGetTime();
 	controlPoints = reader1->compareBoards(allBoardStatus, currentPlay);
+	//glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
-	bool autoPlay = true;
+	bool autoPlay = false;
 
 	while (!glfwWindowShouldClose(window)) {
 
@@ -160,38 +162,45 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Inicializamos el menú 
-		//menu.init(camera);
+		menu.init(camera);
 
 
 		//Controlamos inputs para la camara
 		camera.Inputs(window);
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
-		// renderizado desde el punto de vista de la luz (para sombras)
+		mat4 lightView = lookAt(lightPos,vec3(0.0f, 0.0f, 0.0f),vec3(0.0f, 1.0f, 0.0f));
+		mat4 lightSpaceMatrix = lightProjection * lightView;
 		simpleDepthShader.Activate();
 		glUniformMatrix4fv(glGetUniformLocation(simpleDepthShader.ID, "lightSpaceMatrix"), 1, GL_FALSE, value_ptr(lightSpaceMatrix));
 		glViewport(0, 0, width, height);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		
 		drawPieces(window, simpleDepthShader, camera, board, pawn, bishop, tower, horse, queen, king, allPlays[currentPlay], controlPoints);
+		
 
 		// Renderizado normal de la escena
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		shaderProgram.Activate();
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, depthMap);
 		glUniform1i(glGetUniformLocation(shaderProgram.ID, "depthMap"), 1);
+		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightSpaceMatrix"), 1, GL_FALSE, value_ptr(lightSpaceMatrix));
-		//Dibujamos tablero y piezas
-			
-			
 		drawPieces(window, shaderProgram, camera, board, pawn, bishop, tower, horse, queen, king, allPlays[currentPlay], controlPoints);
+		
+
+		skyboxShader.Activate();
+		glm::mat4 view = glm::mat4(glm::mat3(camera.getView()));
+
+		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		skybox.draw();
 
 			
-		double currentTime = glfwGetTime();
+		/*double currentTime = glfwGetTime();
 		
 		if ((currentTime - previousTime) >= 1) {
 				
@@ -208,11 +217,12 @@ int main() {
 		vec3 pieceZoom = vec3(0.2f, 0.2f, 0.2f);
 		vec3 pieceRotation = vec3(1.f, 0.f, 0.f);
 
-		pawn.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		pawn.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);*/
 
 		// actualizacion e intercambio de buffers
-		Sleep(1000);
-		updateBoard(window, currentPlay, allPlays.size(), released, controlPoints, autoPlay);
+		//Sleep(1000);
+		
+		updateBoard(window, currentPlay, allPlays.size(), released, controlPoints, og_lightPos, lightPos, autoPlay, angle);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -376,13 +386,9 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 
 }
 
-void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, bool autoPlay) {
+void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, bool autoPlay, float& angle) {
 
-	if (autoPlay) {
-
-		i++;
-
-	}else {
+	
 
 		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && i < size - 1 && released)
 		{
@@ -400,7 +406,20 @@ void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<ve
 			released = true;
 		}
 
+	
+
+	float DEGTORAD = glm::radians(angle);
+	float r = sqrt(pow(og_lightPos.x, 2) + pow(og_lightPos.z, 2));
+	if (glfwGetKey(window, GLFW_KEY_Q))
+	{
+		angle++;
 	}
+	if (glfwGetKey(window, GLFW_KEY_E))
+	{
+		angle--;
+	}
+	lightPos.x = cos(DEGTORAD) * r;
+	lightPos.z = sin(DEGTORAD) * r;
 
 	
 }

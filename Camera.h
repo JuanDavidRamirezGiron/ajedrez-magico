@@ -29,6 +29,8 @@ public:
 	int width;
 	int height;
 
+	glm::mat4 projectionMat;
+
 	// Adjust the speed of the camera and it's sensitivity when looking around
 	float speed = 0.1f;
 	float sensitivity = 100.0f;
@@ -45,5 +47,7 @@ public:
 	void CenitalCamera();
 	void WhitePiecesCamera();
 	void BlackPiecesCamera();
+	glm::mat4 getView();
+	glm::mat4 getProjection();
 };
 #endif

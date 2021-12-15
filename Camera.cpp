@@ -21,6 +21,7 @@ void Camera::updateMatrix(float FOVdeg, float nearPlane, float farPlane)
 	view = glm::lookAt(Position, Position + Orientation, Up);
 	// Adds perspective to the scene
 	projection = glm::perspective(glm::radians(FOVdeg), (float)width / height, nearPlane, farPlane);
+	projectionMat = projection;
 
 	// Sets new camera matrix
 	cameraMatrix = projection * view;
@@ -163,4 +164,12 @@ void Camera::CenitalCamera()
 	Position = glm::vec3(3.6341f, 22.8766f, 1.2473f);
 	Orientation = glm::vec3(-0.1339f, -0.9960f, -0.0002f);
 	Up = glm::vec3(0.0000f, 1.0000f, 0.0000f);
+}
+
+glm::mat4 Camera::getView() {
+	return glm::lookAt(Position, Position + Orientation, Up);
+}
+
+glm::mat4 Camera::getProjection() {
+	return projectionMat;
 }
