@@ -1,0 +1,6 @@
+# Created by Kenney (www.kenney.nl)
+
+newmtl horse_b
+Kd 1 1 1
+map_Kd Textures/horse_b.png
+

@@ -16,7 +16,7 @@ using namespace glm;
 
 void setOpenGLVersion();
 void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, bool autoPlay, float& angle);
-void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model board, Model pawn, Model bishop, Model tower, Model horse, Model queen, Model king, std::vector<std::vector<int>> arraygame, vector<vec3> controlPoints);
+void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model board, Model pawn_b, Model bishop_b, Model tower_b, Model horse_b, Model queen_b, Model king_b, Model pawn_w, Model bishop_w, Model tower_w, Model horse_w, Model queen_w, Model king_w, std::vector<std::vector<int>> arraygame, vector<vec3> controlPoints);
 vector<vec3> draw_TFBSpline_Curve(vector<vec3> ctr_points, int nptsCorba, float pas);
 vec3 Punt_Corba_BSpline(float t, vec3* ctr);
 
@@ -90,15 +90,23 @@ int main() {
 	Shader skyboxShader("skyboxShader.vert", "skyboxShader.frag");
 	
 	//Creamos los modelos y la camara
+	Skybox skybox(skyboxShader);
 	Camera camera(width, height, vec3(3.6341f, 22.8766f, 1.2473f), vec3(-0.1339f, -0.9960f, -0.0002f), vec3(0.0000f, 1.0000f, 0.0000f));
 	Model board("models/board.obj");
-	Model pawn("models/pawn.obj");
-	Model bishop("models/bishop.obj");
-	Model tower("models/tower.obj");
-	Model horse("models/horse.obj");
-	Model queen("models/queen.obj");
-	Model king("models/king.obj");
-	Skybox skybox(skyboxShader);
+	
+
+	Model pawn_b("models/pawn_b.obj");
+	Model bishop_b("models/bishop_b.obj");
+	Model tower_b("models/tower_b.obj");
+	Model horse_b("models/horse_b.obj");
+	Model queen_b("models/queen_b.obj");
+	Model king_b("models/king_b.obj");
+	Model pawn_w("models/pawn_w.obj");
+	Model bishop_w("models/bishop_w.obj");
+	Model tower_w("models/tower_w.obj");
+	Model horse_w("models/horse_w.obj");
+	Model queen_w("models/queen_w.obj");
+	Model king_w("models/king_w.obj");
 	
 	
 	//Color y posición de la luz para shaders
@@ -182,7 +190,8 @@ int main() {
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		drawPieces(window, simpleDepthShader, camera, board, pawn, bishop, tower, horse, queen, king, allPlays[currentPlay], controlPoints);
+		drawPieces(window, simpleDepthShader, camera, board, pawn_b, bishop_b, tower_b, horse_b, queen_b, king_b, pawn_w, bishop_w, 
+			tower_w, horse_w, queen_w, king_w, allPlays[currentPlay], controlPoints);
 		
 
 		// Renderizado normal de la escena
@@ -195,8 +204,10 @@ int main() {
 		glUniform1i(glGetUniformLocation(shaderProgram.ID, "depthMap"), 1);
 		glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightSpaceMatrix"), 1, GL_FALSE, value_ptr(lightSpaceMatrix));
-		drawPieces(window, shaderProgram, camera, board, pawn, bishop, tower, horse, queen, king, allPlays[currentPlay], controlPoints);
 		
+		drawPieces(window, shaderProgram, camera, board, pawn_b, bishop_b, tower_b, horse_b, queen_b, king_b, 
+			pawn_w, bishop_w, tower_w, horse_w, queen_w, king_w, allPlays[currentPlay], controlPoints);
+
 
 		skyboxShader.Activate();
 		glm::mat4 view = glm::mat4(glm::mat3(camera.getView()));
@@ -314,7 +325,7 @@ vector<vec3> draw_TFBSpline_Curve(vector<vec3> ctr_points, int nptsCorba, float 
 	return puntsCorba;
 }
 
-void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model board, Model pawn, Model bishop, Model tower, Model horse, Model queen, Model king, std::vector<std::vector<int>> arraygame, vector<vec3> controlPoints) {
+void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model board, Model pawn_b, Model bishop_b, Model tower_b, Model horse_b, Model queen_b, Model king_b, Model pawn_w, Model bishop_w, Model tower_w, Model horse_w, Model queen_w, Model king_w, std::vector<std::vector<int>> arraygame, vector<vec3> controlPoints) {
 
 	const int originX = -9;
 	const int originZ = 10;
@@ -323,7 +334,7 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 	vec3 pieceRotation = vec3(1.f, 0.f, 0.f);
 
 	//Dibujamos el tablero
-	board.Draw(shaderProgram, camera, vec3(0.0f, -1.9f, 0.0f), 1.5708f, vec3(1.f, 0.f, 0.f), vec3(1.f, 1.f, 1.f));
+	board.Draw(shaderProgram, camera, vec3(0.0f, -2.7f, 0.0f), 1.5708f, vec3(1.f, 0.f, 0.f), vec3(1.f, 1.f, 1.f));
 
 	//Iteramos en el vector de posiciones de piezas
 	for (auto piece : arraygame) {
@@ -339,22 +350,40 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 		switch (piece[0])
 		{
 		case PAWN:
-			pawn.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			if (piece[1])
+				pawn_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			else
+				pawn_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case BISHOP:
-			bishop.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			if (piece[1])
+				bishop_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			else
+				bishop_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case TOWER:
-			tower.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			if (piece[1])
+				tower_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			else
+				tower_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case HORSE:
-			horse.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 00.f, pieceRotation, pieceZoom);
+			if (piece[1])
+				horse_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 00.f, pieceRotation, pieceZoom);
+			else
+				horse_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case QUEEN:
-			queen.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			if (piece[1])
+				queen_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			else
+				queen_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case KING:
-			king.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			if (piece[1])
+				king_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			else
+				king_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		default:
 			break;
@@ -367,27 +396,46 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 	switch (translationPiece[0])
 	{
 	case PAWN:
-		pawn.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		if (translationPiece[1])
+			pawn_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		else
+			pawn_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	case BISHOP:
-		bishop.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		if (translationPiece[1])
+			bishop_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		else
+			bishop_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	case TOWER:
-		tower.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		if (translationPiece[1])
+			tower_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		else
+			tower_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	case HORSE:
-		horse.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		if (translationPiece[1])
+			horse_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 00.f, pieceRotation, pieceZoom);
+		else
+			horse_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	case QUEEN:
-		queen.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		if (translationPiece[1])
+			queen_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		else
+			queen_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	case KING:
-		king.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		if (translationPiece[1])
+			king_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		else
+			king_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	default:
 		break;
 	}
 }
+
 
 void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, bool autoPlay, float& angle) {
 
