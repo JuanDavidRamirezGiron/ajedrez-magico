@@ -54,15 +54,15 @@ vector<glm::vec3> Movements::compareBoards(vector<vector<vector<char>>> allBoard
 		{
 			if (matrizJugada[i][j] != matrizFinal[i][j])
 			{
-				if (iguals1) {
-					iguals1 = false;
-					primerpieceX = originX + (i+1) * cellSize;
-					primerpieceZ = originZ - (j+1) * cellSize;
+				if (iguals) {
+					iguals = false;
+					segundopieceX = originX + (i + 1) * cellSize;
+					segundopieceZ = originZ - (j + 1) * cellSize;
 				}
 				else{
-					iguals = false;
-					segundopieceX = originX + (i+1) * cellSize;
-					segundopieceZ = originZ - (j+1) * cellSize;
+					iguals1 = false;
+					primerpieceX = originX + (i + 1) * cellSize;
+					primerpieceZ = originZ - (j + 1) * cellSize;
 				}
 			}
 			
@@ -72,7 +72,7 @@ vector<glm::vec3> Movements::compareBoards(vector<vector<vector<char>>> allBoard
 
 	}
 	
-	if (position % 2 == 0)
+	if (position % 2 != 0)
 	{
 		float distanceX = segundopieceX - primerpieceX;
 		float distanceZ = segundopieceZ;
@@ -101,8 +101,8 @@ vector<glm::vec3> Movements::compareBoards(vector<vector<vector<char>>> allBoard
 			float distanceZ2 = distanceZ * 2.0f / 3;
 		}
 		puntosControl.push_back({ segundopieceX, 0, segundopieceZ }  );
-		puntosControl.push_back({ primerpieceX + (distanceX * 1.0f / 3), 3, distanceZ1});
-		puntosControl.push_back({ primerpieceX + (distanceX * 2.0f / 3), 3, distanceZ2});
+		puntosControl.push_back({ segundopieceX + (distanceX * 1.0f / 3), 3, distanceZ1});
+		puntosControl.push_back({ segundopieceX + (distanceX * 2.0f / 3), 3, distanceZ2});
 		puntosControl.push_back({ primerpieceX, 0, primerpieceZ });
 	}
 

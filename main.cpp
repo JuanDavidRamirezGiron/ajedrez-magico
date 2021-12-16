@@ -39,6 +39,7 @@ vec3 Punt_Corba_BSpline(float t, vec3* ctr);
 #define H 8
 
 vector<int> translationPiece;
+int translationIndex = 0;
 vector<vec3> punts = { {0,0,0}, {0,0,0} };
 
 
@@ -114,7 +115,6 @@ int main() {
 	//variables para cambio de jugada
 	bool released = true;
 	int currentPlay = 0;
-	int translationIndex = 0;
 	float angle = 180;
 
 	//Creamos la intefície de usuario
@@ -150,10 +150,11 @@ int main() {
 	
 	//Mover piezas
 	double previousTime = glfwGetTime();
-	controlPoints = reader1->compareBoards(allBoardStatus, currentPlay);
 	//glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
 	bool autoPlay = false;
+	vec3 pieceZoom = vec3(0.2f, 0.2f, 0.2f);
+	vec3 pieceRotation = vec3(1.f, 0.f, 0.f);
 
 	while (!glfwWindowShouldClose(window)) {
 
@@ -161,13 +162,17 @@ int main() {
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//Inicializamos el menú 
-		menu.init(camera);
-
-
 		//Controlamos inputs para la camara
 		camera.Inputs(window);
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
+
+		controlPoints = reader1->compareBoards(allBoardStatus, currentPlay);
+		double currentTime = glfwGetTime();
+
+		if ((currentTime - previousTime) >= 0.2) {
+			translationIndex = translationIndex == punts.size() - 1 ? translationIndex : translationIndex + 1;
+			previousTime = currentTime;
+		}
 
 		mat4 lightView = lookAt(lightPos,vec3(0.0f, 0.0f, 0.0f),vec3(0.0f, 1.0f, 0.0f));
 		mat4 lightSpaceMatrix = lightProjection * lightView;
@@ -199,29 +204,10 @@ int main() {
 		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		skybox.draw();
 
-			
-		/*double currentTime = glfwGetTime();
-		
-		if ((currentTime - previousTime) >= 1) {
-				
-			translationIndex = translationIndex == punts.size() - 1 ? 0 : translationIndex + 1;
-
-			previousTime = currentTime;
-				
-		}
-			
-		int pieceX = punts[translationIndex].x;
-		int pieceY = punts[translationIndex].y;
-		int pieceZ = punts[translationIndex].z;
-
-		vec3 pieceZoom = vec3(0.2f, 0.2f, 0.2f);
-		vec3 pieceRotation = vec3(1.f, 0.f, 0.f);
-
-		pawn.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);*/
-
 		// actualizacion e intercambio de buffers
 		//Sleep(1000);
-		
+		//Inicializamos el menú 
+		menu.init(camera);
 		updateBoard(window, currentPlay, allPlays.size(), released, controlPoints, og_lightPos, lightPos, autoPlay, angle);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -270,13 +256,7 @@ vec3 Punt_Corba_BSpline(float t, vec3* ctr)
 		p.z += coef[i] * ctr[i].z;
 	}
 
-	p.x *= 5;
-	p.y *= 5;
-	p.z *= 5;
-
-
 	return p;
-
 }
 
 vector<vec3> draw_TFBSpline_Curve(vector<vec3> ctr_points, int nptsCorba, float pas)
@@ -291,20 +271,17 @@ vector<vec3> draw_TFBSpline_Curve(vector<vec3> ctr_points, int nptsCorba, float 
 // Càrrega primers punts de control.
 	for (int i = 0; i < 4; i++)
 	{
-		float aux = ctr_points[i].y;
-		ctr_points[i].y = ctr_points[i].z;
-		ctr_points[i].z = -aux;
-
 		ctr[i].x = ctr_points[i].x;
 		ctr[i].y = ctr_points[i].y;
 		ctr[i].z = ctr_points[i].z;
-
 	}
 
 
 
+	puntsCorba.push_back(ctr_points[0]);
 	// Càlcul i dibuix Triedre de Frenet en cada vèrtex de la corba B-Spline
 	vertexL1 = Punt_Corba_BSpline(t, ctr);
+	puntsCorba.push_back(vertexL1);
 
 	t = t + pas;
 	while (patch <= nptsCorba - 4) {
@@ -331,6 +308,9 @@ vector<vec3> draw_TFBSpline_Curve(vector<vec3> ctr_points, int nptsCorba, float 
 			t = t + pas;
 		}
 	}
+
+	puntsCorba.push_back(ctr_points[3]);
+
 	return puntsCorba;
 }
 
@@ -348,12 +328,11 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 	//Iteramos en el vector de posiciones de piezas
 	for (auto piece : arraygame) {
 		//aqui codigo para pasar del vector a las posiciones
-		int pieceX = originX + piece[2] * cellSize;
-		int pieceZ = originZ - piece[3] * cellSize;
+		float pieceX = originX + piece[2] * cellSize;
+		float pieceZ = originZ - piece[3] * cellSize;
 
-		if (pieceX == controlPoints[3].x && pieceZ == controlPoints[3].z)
+		if (pieceX == controlPoints[0].x && pieceZ == controlPoints[0].z)
 		{
-
 			translationPiece = piece;
 			continue;
 		}
@@ -382,31 +361,54 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 		}
 	}
 
-
-
+	float pieceX = punts[translationIndex].x;
+	float pieceY = punts[translationIndex].y;
+	float pieceZ = punts[translationIndex].z;
+	switch (translationPiece[0])
+	{
+	case PAWN:
+		pawn.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		break;
+	case BISHOP:
+		bishop.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		break;
+	case TOWER:
+		tower.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		break;
+	case HORSE:
+		horse.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		break;
+	case QUEEN:
+		queen.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		break;
+	case KING:
+		king.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
+		break;
+	default:
+		break;
+	}
 }
 
 void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, bool autoPlay, float& angle) {
 
 	
 
-		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && i < size - 1 && released)
-		{
-			released = false;
-			i++;
-		}
-		else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && i > 0 && released)
-		{
-			released = false;
-			i--;
-		}
-		else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE && !released && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
-		{
-			punts = draw_TFBSpline_Curve(controlPoints, 4, 0.005);
-			released = true;
-		}
-
-	
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && i < size - 1 && released)
+	{
+		released = false;
+		i++;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && i > 0 && released)
+	{
+		released = false;
+		i--;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE && !released && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
+	{
+		punts = draw_TFBSpline_Curve(controlPoints, 4, 0.05);
+		translationIndex = 0;
+		released = true;
+	}
 
 	float DEGTORAD = glm::radians(angle);
 	float r = sqrt(pow(og_lightPos.x, 2) + pow(og_lightPos.z, 2));
@@ -420,8 +422,6 @@ void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<ve
 	}
 	lightPos.x = cos(DEGTORAD) * r;
 	lightPos.z = sin(DEGTORAD) * r;
-
-	
 }
 
 void setOpenGLVersion() {
