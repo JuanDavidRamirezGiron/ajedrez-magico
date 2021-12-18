@@ -178,7 +178,7 @@ int main() {
 		controlPoints = reader1->compareBoards(allBoardStatus, currentPlay);
 		double currentTime = glfwGetTime();
 
-		if ((currentTime - previousTime) >= 0.2) {
+		if ((currentTime - previousTime) >= 1/30) {
 			translationIndex = translationIndex == punts.size() - 1 ? translationIndex : translationIndex + 1;
 			previousTime = currentTime;
 		}
@@ -388,46 +388,58 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 		}
 	}
 
+	vector<vec3> initial = { {0,0,0}, {0,0,0} };
+
 	float pieceX = punts[translationIndex].x;
 	float pieceY = punts[translationIndex].y;
 	float pieceZ = punts[translationIndex].z;
+	
+	if (punts == initial) {
+		
+		pieceX = originX + translationPiece[2] * cellSize;
+		pieceY = 0;
+		pieceZ = originZ - translationPiece[3] * cellSize;
+	}
+	
+
+
 	switch (translationPiece[0])
 	{
 	case PAWN:
 		if (translationPiece[1])
-			pawn_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			pawn_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		else
-			pawn_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			pawn_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	case BISHOP:
 		if (translationPiece[1])
-			bishop_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			bishop_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		else
-			bishop_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			bishop_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	case TOWER:
 		if (translationPiece[1])
-			tower_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			tower_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		else
-			tower_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			tower_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	case HORSE:
 		if (translationPiece[1])
-			horse_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 00.f, pieceRotation, pieceZoom);
+			horse_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 00.f, pieceRotation, pieceZoom);
 		else
-			horse_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			horse_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	case QUEEN:
 		if (translationPiece[1])
-			queen_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			queen_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		else
-			queen_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			queen_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	case KING:
 		if (translationPiece[1])
-			king_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			king_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		else
-			king_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			king_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 		break;
 	default:
 		break;
@@ -479,4 +491,3 @@ void setOpenGLVersion() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 }
-
