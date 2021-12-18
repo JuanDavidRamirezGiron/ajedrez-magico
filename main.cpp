@@ -17,8 +17,9 @@ using namespace glm;
 void setOpenGLVersion();
 void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, bool autoPlay, float& angle);
 void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model board, Model pawn_b, Model bishop_b, Model tower_b, Model horse_b, Model queen_b, Model king_b, Model pawn_w, Model bishop_w, Model tower_w, Model horse_w, Model queen_w, Model king_w, std::vector<std::vector<int>> arraygame, vector<vec3> controlPoints);
-vector<vec3> draw_TFBSpline_Curve(vector<vec3> ctr_points, int nptsCorba, float pas);
-vec3 Punt_Corba_BSpline(float t, vec3* ctr);
+
+vector<vec3> draw_Bezier_Curve_VAO(vector<vec3> ctr_points, int nptsCorba, float pas, bool tancat);
+vec3 Punt_Bezier_Curve(float t, vec3* ctr);
 
 //piezas
 #define PAWN 1
@@ -160,7 +161,7 @@ int main() {
 	double previousTime = glfwGetTime();
 	//glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
-	bool autoPlay = false;
+	bool autoPlay = true;
 	vec3 pieceZoom = vec3(0.2f, 0.2f, 0.2f);
 	vec3 pieceRotation = vec3(1.f, 0.f, 0.f);
 
@@ -234,17 +235,17 @@ int main() {
 }
 
 
-// Punt_Corba_Spline: Calcul del punt del spline en coordenades 3D (CPunt3D) segons el 
+// Punt_Bezier_Curve: Calcul del punt de Bezier en coordenades 3D (CPunt3D) segons el 
 //             paràmetre i i els punts de control ctr 
-vec3 Punt_Corba_BSpline(float t, vec3* ctr)
+vec3 Punt_Bezier_Curve(float t, vec3* ctr)
 {
-	// Matriu dels Splines
-	const double AS[4][4] =
+
+	const double AB[4][4] =
 	{
-		{ -1.0 / 6.0, 0.5, -0.5, 1.0 / 6.0 },
-		{ 0.5, -1.0, 0.0, 4.0 / 6.0 },
-		{ -0.5, 0.5, 0.5, 1.0 / 6.0 },
-		{ 1.0 / 6.0, 0.0, 0.0, 0.0 }
+		{ -1.0, 3.0, -3.0, 1.0 },
+		{ 3.0, -6.0, 3.0, 0.0 },
+		{ -3.0, 3.0, 0.0, 0.0 },
+		{ 1.0, 0.0, 0.0, 0.0 }
 	};
 
 	vec3 p = { 0, 0, 0 };
@@ -256,7 +257,7 @@ vec3 Punt_Corba_BSpline(float t, vec3* ctr)
 	{
 		coef[i] = 0;
 		for (j = 0; j < 4; j++)
-			coef[i] = coef[i] * t + AS[i][j];
+			coef[i] = coef[i] * t + AB[i][j];
 	}
 
 	// Càlcul de la Posició
@@ -266,42 +267,39 @@ vec3 Punt_Corba_BSpline(float t, vec3* ctr)
 		p.y += coef[i] * ctr[i].y;
 		p.z += coef[i] * ctr[i].z;
 	}
-
 	return p;
 }
 
-vector<vec3> draw_TFBSpline_Curve(vector<vec3> ctr_points, int nptsCorba, float pas)
+// draw_Bezier_Curve_VAO: Càrrega dels punts de la corba de Bezier donada per nptsCorba punts de control definits en ctr_points, 
+//             amb increment pas, corba tancada o no i si volem visualtzar el Triedre de Frenet 
+vector<vec3> draw_Bezier_Curve_VAO(vector<vec3> ctr_points, int nptsCorba, float pas, bool tancat)
 {
-	vec3 vertexL1, vertexL2;
-	vec3 ctr[4];		// Punts control del patch de la B-Spline.
-	int patch = 0;		// Patch actual.
-	GLfloat t = 0;
-	vector<vec3> puntsCorba;
+	GLuint vaoId = 0;
+	std::vector <double> vertices, colors;		
+	vertices.resize(0);		colors.resize(0);	
 
-	//t = t - pas;
-// Càrrega primers punts de control.
+	vec3 vertexL1, vertexL2;
+	vec3 ctr[4];		
+	int patch = 0;		
+	GLfloat t = 0;
+
 	for (int i = 0; i < 4; i++)
 	{
 		ctr[i].x = ctr_points[i].x;
 		ctr[i].y = ctr_points[i].y;
 		ctr[i].z = ctr_points[i].z;
 	}
-
-
-
-	puntsCorba.push_back(ctr_points[0]);
-	// Càlcul i dibuix Triedre de Frenet en cada vèrtex de la corba B-Spline
-	vertexL1 = Punt_Corba_BSpline(t, ctr);
+	
+	vector<vec3> puntsCorba;
+	vertexL1 = Punt_Bezier_Curve(t, ctr);
 	puntsCorba.push_back(vertexL1);
 
 	t = t + pas;
 	while (patch <= nptsCorba - 4) {
-		if (t >= 1.0)
-		{
-			vertexL2 = Punt_Corba_BSpline(1.0, ctr);
-			puntsCorba.push_back(vertexL2);
-			t = 0.0;
-			patch++;
+		if (t > 1.0 + 2 * pas) {
+			t -= 1.0;
+			patch = patch + 3;
+			if ((patch < nptsCorba - 1) && (patch + 4 > nptsCorba)) patch = nptsCorba - 4;
 			if (patch <= nptsCorba - 4)
 			{
 				for (int i = 0; i < 4; i++)
@@ -312,15 +310,15 @@ vector<vec3> draw_TFBSpline_Curve(vector<vec3> ctr_points, int nptsCorba, float 
 				}
 			}
 		}
-		else if (patch <= nptsCorba - 4) {
-			vertexL2 = Punt_Corba_BSpline(t, ctr);
+		if (patch <= nptsCorba - 4) {
+			if (t > 1.0) vertexL2 = Punt_Bezier_Curve(1.0, ctr);
+			else vertexL2 = Punt_Bezier_Curve(t, ctr);
 			puntsCorba.push_back(vertexL2);
+		
 			vertexL1 = vertexL2;
 			t = t + pas;
 		}
 	}
-
-	puntsCorba.push_back(ctr_points[3]);
 
 	return puntsCorba;
 }
@@ -453,7 +451,7 @@ void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<ve
 	}
 	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE && !released && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
 	{
-		punts = draw_TFBSpline_Curve(controlPoints, 4, 0.05);
+		punts = draw_Bezier_Curve_VAO(controlPoints, 4, 0.05, false);
 		translationIndex = 0;
 		released = true;
 	}
