@@ -49,7 +49,7 @@ vector<glm::vec3> Movements::compareBoards(vector<vector<vector<char>>> allBoard
 	int i = 0;
 	int j = 0;
 	while ((iguals || iguals1) && i < matrizJugada.size()) {
-		j = 1;
+		j = 0;
 		while ((iguals1 || iguals) && j < matrizJugada[i].size())
 		{
 			if (matrizJugada[i][j] != matrizFinal[i][j])

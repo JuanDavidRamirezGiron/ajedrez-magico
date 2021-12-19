@@ -72,7 +72,7 @@ int main() {
 	
 
 	Movements* reader1 = new Movements;
-	FENFileReader* reader = new FENFileReader("test.fen");
+	FENFileReader* reader = new FENFileReader("Partida1.fen");
 	StatusToPlaysTransformer* transformer = new StatusToPlaysTransformer();
 	
 	allBoardStatus = reader->prepareBoard();
@@ -105,7 +105,7 @@ int main() {
 	
 	//Creamos los modelos y la camara
 	Skybox skybox(skyboxShader);
-	Camera camera(width, height, vec3(3.6341f, 22.8766f, 1.2473f), vec3(-0.1339f, -0.9960f, -0.0002f), vec3(0.0000f, 1.0000f, 0.0000f));
+	Camera camera(width, height, vec3(3.6341f, 22.8766f, 19.2473f), vec3(-0.1339f, -0.9960f, -0.0002f), vec3(0.0000f, 1.0000f, 0.0000f));
 	Model board("models/board_2.obj");
 	
 
@@ -127,9 +127,9 @@ int main() {
 	//TODO Mirar sombra casilla [0]-[1]
 	float near_plane = 0.1f, far_plane = 100.0f;
 	vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	vec3 og_lightPos =vec3(-20.0f, 10.0f, 0.0f);
+	vec3 og_lightPos =vec3(-20.0f, 15.0f, 0.0f);
 	vec3 lightPos = og_lightPos;
-	mat4 lightProjection = ortho(-15.0f, 15.0f, -15.0f, 15.0f, near_plane, far_plane);
+	mat4 lightProjection = ortho(-27.0f, 27.0f, -27.0f, 27.0f, near_plane, far_plane);
 	
 	shaderProgram.Activate();
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
