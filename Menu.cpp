@@ -7,6 +7,7 @@ Menu::Menu(GLFWwindow* window)
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
+	boardChange = false;
 }
 
 void Menu::shutDown()
@@ -16,18 +17,30 @@ void Menu::shutDown()
 	ImGui::DestroyContext();
 }
 
-void Menu::init(Camera& camera)
+void Menu::init(FENFileReader* &fenFileReader, Camera& camera)
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-	ImGui::Begin("MENÚ DELOKOS", NULL, ImGuiWindowFlags_MenuBar);
+	ImGui::Begin("MENU", NULL, ImGuiWindowFlags_MenuBar);
 	if (ImGui::BeginMenuBar())
 	{
-		if (ImGui::BeginMenu("Fichero")) {
-			if (ImGui::MenuItem("1.Importar Partida")) {
-				camera.CenitalCamera();
+		if (ImGui::BeginMenu("Seleccionar Partida")) {
+			string file = "";
+			if (ImGui::MenuItem("Partida 1")) {
+				file = "Partida1.fen";
+				boardChange = true;
 			}
+			if (ImGui::MenuItem("Partida 2")) {
+				file = "Partida2.fen";
+				boardChange = true;
+			}
+			if (ImGui::MenuItem("Partida 3")) {
+				file = "Partida3.fen";
+				boardChange = true;
+			}
+			fenFileReader = new FENFileReader(file);
+
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Camara"))
@@ -49,3 +62,5 @@ void Menu::init(Camera& camera)
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
+
+

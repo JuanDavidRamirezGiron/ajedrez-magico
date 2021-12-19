@@ -234,9 +234,16 @@ int main() {
 		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		skybox.draw();
 
-		// actualizacion e intercambio de buffers
-		//Inicializamos el menú 
-		menu.init(camera);
+		menu.init(reader, camera);
+		if (menu.getBoardChange()) {
+			allBoardStatus = reader->prepareBoard();
+			allPlays = transformer->transformStatusToPlays(allBoardStatus);
+			s_globalNumPlays = allPlays.size();
+			s_globalI = 0;
+			translationPiece = {};
+			anteriortranslationPiece = {};
+			menu.setBoardChange(false);
+		}
 		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -362,7 +369,8 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 		if (pieceX == controlPoints[0].x && pieceZ == controlPoints[0].z)
 		{
 			translationPiece = piece;
-			continue;
+			if(anteriortranslationPiece.size() != 0)
+				continue;
 		}
 		switch (piece[0])
 		{
@@ -406,7 +414,7 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 			break;
 		}
 	}
-	/*
+	
 	if (anteriortranslationPiece.size() != 0) {
 
 		vector<vec3> initial = { {0,0,0}, {0,0,0} };
@@ -464,7 +472,7 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 		default:
 			break;
 		}
-	}*/
+	}
 	
 }
 
