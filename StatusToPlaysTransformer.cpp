@@ -8,6 +8,7 @@ vector<vector<vector<int>>> StatusToPlaysTransformer::transformStatusToPlays(vec
 	
 	vector<vector<int>> tempPlayPieces;
 	vector<int> tempPiece;
+	this->allPlays = {};
 
 
 	for (vector<vector<char>> boards : allBoardStatus)

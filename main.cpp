@@ -106,7 +106,7 @@ int main() {
 	//Creamos los modelos y la camara
 	Skybox skybox(skyboxShader);
 	Camera camera(width, height, vec3(3.6341f, 22.8766f, 1.2473f), vec3(-0.1339f, -0.9960f, -0.0002f), vec3(0.0000f, 1.0000f, 0.0000f));
-	Model board("models/board.obj");
+	Model board("models/board_2.obj");
 	
 
 	Model pawn_b("models/pawn_b.obj");
@@ -125,9 +125,9 @@ int main() {
 	
 	//Color y posición de la luz para shaders
 	//TODO Mirar sombra casilla [0]-[1]
-	float near_plane = 1.0f, far_plane = 20.0f;
+	float near_plane = 0.1f, far_plane = 100.0f;
 	vec4 lightColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	vec3 og_lightPos =vec3(-5.0f, 5.0f, 0.0f);
+	vec3 og_lightPos =vec3(-20.0f, 10.0f, 0.0f);
 	vec3 lightPos = og_lightPos;
 	mat4 lightProjection = ortho(-15.0f, 15.0f, -15.0f, 15.0f, near_plane, far_plane);
 	
@@ -234,9 +234,10 @@ int main() {
 		glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		skybox.draw();
 
-		menu.init(reader, camera);
+		menu.init(reader, camera, s_globalI, s_globalNumPlays, s_autoPlay);
 		if (menu.getBoardChange()) {
 			allBoardStatus = reader->prepareBoard();
+			reader->printAllBoardStatus(allBoardStatus);
 			allPlays = transformer->transformStatusToPlays(allBoardStatus);
 			s_globalNumPlays = allPlays.size();
 			s_globalI = 0;
@@ -358,62 +359,10 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 
 
 	//Dibujamos el tablero
-	board.Draw(shaderProgram, camera, vec3(0.0f, -2.7f, 0.0f), 1.5708f, vec3(1.f, 0.f, 0.f), vec3(1.f, 1.f, 1.f));
+	board.Draw(shaderProgram, camera, vec3(0.f, -2.7f, 18.f), 1.5708f, vec3(1.f, 0.f, 0.f), vec3(1.f, 1.f, 1.f));
 
 	//Iteramos en el vector de posiciones de piezas
-	for (auto piece : arraygame) {
-		//aqui codigo para pasar del vector a las posiciones
-		float pieceX = originX + piece[2] * cellSize;
-		float pieceZ = originZ - piece[3] * cellSize;
-
-		if (pieceX == controlPoints[0].x && pieceZ == controlPoints[0].z)
-		{
-			translationPiece = piece;
-			if(anteriortranslationPiece.size() != 0)
-				continue;
-		}
-		switch (piece[0])
-		{
-		case PAWN:
-			if (piece[1])
-				pawn_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
-			else
-				pawn_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
-			break;
-		case BISHOP:
-			if (piece[1])
-				bishop_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
-			else
-				bishop_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
-			break;
-		case TOWER:
-			if (piece[1])
-				tower_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
-			else
-				tower_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
-			break;
-		case HORSE:
-			if (piece[1])
-				horse_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces-90), pieceRotation, vec3(0.19f, 0.2f, 0.2f));
-			else
-				horse_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(-anglePieces-90), pieceRotation, vec3(0.19f, 0.2f, 0.2f));
-			break;
-		case QUEEN:
-			if (piece[1])
-				queen_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
-			else
-				queen_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
-			break;
-		case KING:
-			if (piece[1])
-				king_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
-			else
-				king_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
-			break;
-		default:
-			break;
-		}
-	}
+	
 	
 	if (anteriortranslationPiece.size() != 0) {
 
@@ -427,48 +376,104 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 		
 			pieceX = originX + anteriortranslationPiece[2] * cellSize;
 			pieceY = 0;
-			pieceZ = originZ - anteriortranslationPiece[3] * cellSize;
+			pieceZ = originZ + anteriortranslationPiece[3] * cellSize;
 		}
 	
 	
 		switch (anteriortranslationPiece[0])
 		{
 		case PAWN:
-			if (anteriortranslationPiece[1])
+			if (!anteriortranslationPiece[1])
 				pawn_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			else
 				pawn_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), 0.0f, pieceRotation, pieceZoom);
 			break;
 		case BISHOP:
-			if (anteriortranslationPiece[1])
+			if (!anteriortranslationPiece[1])
 				bishop_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
 			else
 				bishop_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
 			break;
 		case TOWER:
-			if (anteriortranslationPiece[1])
+			if (!anteriortranslationPiece[1])
 				tower_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
 			else
 				tower_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
 			break;
 		case HORSE:
-			if (anteriortranslationPiece[1])
-				horse_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(anglePieces - 90), pieceRotation, vec3(0.19f, 0.2f, 0.2f));
+			if (!anteriortranslationPiece[1])
+				horse_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(-anglePieces - 90), pieceRotation, vec3(0.19f, 0.2f, 0.2f));
 			else
-				horse_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(-anglePieces - 90), pieceRotation, vec3(0.19f, 0.2f, 0.2f));
+				horse_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(anglePieces - 90), pieceRotation, vec3(0.19f, 0.2f, 0.2f));
 			break;
 		case QUEEN:
-			if (anteriortranslationPiece[1])
+			if (!anteriortranslationPiece[1])
 				queen_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
 			else
 				queen_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
 			break;
 		case KING:
-			if (anteriortranslationPiece[1])
+			if (!anteriortranslationPiece[1])
 				king_b.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
 			else
 				king_w.Draw(shaderProgram, camera, vec3(pieceX, pieceY, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
 			break;
+		default:
+			break;
+		}
+	}
+
+
+	for (auto piece : arraygame) {
+		//aqui codigo para pasar del vector a las posiciones
+		float pieceX = originX + piece[2] * cellSize;
+		float pieceZ = originZ + piece[3] * cellSize;
+
+		if (pieceX == controlPoints[0].x && pieceZ == controlPoints[0].z)
+		{
+			translationPiece = piece;
+			if (anteriortranslationPiece.size() != 0)
+				continue;
+		}
+		switch (piece[0])
+		{
+		case PAWN:
+			if (!piece[1])
+				pawn_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			else
+				pawn_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), 0.0f, pieceRotation, pieceZoom);
+			break;
+		case BISHOP:
+			if (!piece[1])
+				bishop_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
+			else
+				bishop_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
+			break;
+		case TOWER:
+			if (!piece[1])
+				tower_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
+			else
+				tower_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
+			break;
+		case HORSE:
+			if (!piece[1])
+				horse_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(-anglePieces - 90), pieceRotation, vec3(0.19f, 0.2f, 0.2f));
+			else
+				horse_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces - 90), pieceRotation, vec3(0.19f, 0.2f, 0.2f));
+			break;
+		case QUEEN:
+			if (!piece[1])
+				queen_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
+			else
+				queen_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
+			break;
+		case KING:
+			if (!piece[1])
+				king_b.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
+			else
+				king_w.Draw(shaderProgram, camera, vec3(pieceX, 0.0f, pieceZ), radians(anglePieces), pieceRotation, pieceZoom);
+			break;
+
 		default:
 			break;
 		}

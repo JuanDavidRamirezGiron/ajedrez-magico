@@ -57,12 +57,12 @@ vector<glm::vec3> Movements::compareBoards(vector<vector<vector<char>>> allBoard
 				if (iguals) {
 					iguals = false;
 					segundopieceX = originX + (i + 1) * cellSize;
-					segundopieceZ = originZ - (j + 1) * cellSize;
+					segundopieceZ = originZ + (j + 1) * cellSize;
 				}
 				else{
 					iguals1 = false;
 					primerpieceX = originX + (i + 1) * cellSize;
-					primerpieceZ = originZ - (j + 1) * cellSize;
+					primerpieceZ = originZ + (j + 1) * cellSize;
 				}
 			}
 			
