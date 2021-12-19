@@ -15,11 +15,18 @@
 using namespace glm;
 
 void setOpenGLVersion();
-void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, bool autoPlay, float& angle);
+void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, float& angle, bool& releasedAuto);
 void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model board, Model pawn_b, Model bishop_b, Model tower_b, Model horse_b, Model queen_b, Model king_b, Model pawn_w, Model bishop_w, Model tower_w, Model horse_w, Model queen_w, Model king_w, std::vector<std::vector<int>> arraygame, vector<vec3> controlPoints);
 
 vector<vec3> draw_Bezier_Curve_VAO(vector<vec3> ctr_points, int nptsCorba, float pas, bool tancat);
 vec3 Punt_Bezier_Curve(float t, vec3* ctr);
+void incrementPlay();
+
+
+static std::atomic<bool> s_autoPlay = false;
+static int s_globalI = 0;
+static thread worker;// = thread(incrementPlay);
+
 
 //piezas
 #define PAWN 1
@@ -66,6 +73,8 @@ int main() {
 	
 	allBoardStatus = reader->prepareBoard();
 	allPlays = transformer->transformStatusToPlays(allBoardStatus);
+
+	//reader->printAllBoardStatus(allBoardStatus);
 	
 	setOpenGLVersion();
 
@@ -84,7 +93,6 @@ int main() {
 	glViewport(0, 0, width, height);
 	glEnable(GL_DEPTH_TEST);
 
-	
 	//Cargamos shaders
 	Shader shaderProgram("default.vert", "default.frag");
 	Shader simpleDepthShader("simpleDepthShader.vert", "simpleDepthShader.frag");
@@ -123,6 +131,7 @@ int main() {
 	
 	//variables para cambio de jugada
 	bool released = true;
+	bool releasedAuto = true;
 	int currentPlay = 0;
 	float angle = 180;
 
@@ -161,9 +170,10 @@ int main() {
 	double previousTime = glfwGetTime();
 	//glUniform3f(glGetUniformLocation(shaderProgram.ID, "lightPos"), lightPos.x, lightPos.y, lightPos.z);
 
-	bool autoPlay = true;
 	vec3 pieceZoom = vec3(0.2f, 0.2f, 0.2f);
 	vec3 pieceRotation = vec3(1.f, 0.f, 0.f);
+
+	
 
 	while (!glfwWindowShouldClose(window)) {
 
@@ -175,7 +185,7 @@ int main() {
 		camera.Inputs(window);
 		camera.updateMatrix(45.0f, 0.1f, 100.0f);
 
-		controlPoints = reader1->compareBoards(allBoardStatus, currentPlay);
+		controlPoints = reader1->compareBoards(allBoardStatus, s_globalI);
 		double currentTime = glfwGetTime();
 
 		if ((currentTime - previousTime) >= 1/30) {
@@ -192,7 +202,7 @@ int main() {
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
 		drawPieces(window, simpleDepthShader, camera, board, pawn_b, bishop_b, tower_b, horse_b, queen_b, king_b, pawn_w, bishop_w, 
-			tower_w, horse_w, queen_w, king_w, allPlays[currentPlay], controlPoints);
+			tower_w, horse_w, queen_w, king_w, allPlays[s_globalI], controlPoints);
 		
 
 		// Renderizado normal de la escena
@@ -207,7 +217,7 @@ int main() {
 		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightSpaceMatrix"), 1, GL_FALSE, value_ptr(lightSpaceMatrix));
 		
 		drawPieces(window, shaderProgram, camera, board, pawn_b, bishop_b, tower_b, horse_b, queen_b, king_b, 
-			pawn_w, bishop_w, tower_w, horse_w, queen_w, king_w, allPlays[currentPlay], controlPoints);
+			pawn_w, bishop_w, tower_w, horse_w, queen_w, king_w, allPlays[s_globalI], controlPoints);
 
 
 		skyboxShader.Activate();
@@ -217,10 +227,10 @@ int main() {
 		skybox.draw();
 
 		// actualizacion e intercambio de buffers
-		//Sleep(1000);
 		//Inicializamos el menú 
 		menu.init(camera);
-		updateBoard(window, currentPlay, allPlays.size(), released, controlPoints, og_lightPos, lightPos, autoPlay, angle);
+		//Sleep(1000);
+		updateBoard(window, currentPlay, allPlays.size(), released, controlPoints, og_lightPos, lightPos, angle, releasedAuto);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -230,13 +240,14 @@ int main() {
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
+	if(worker.joinable())
+		worker.detach();
 	return 0;
 	
 }
 
 
-// Punt_Bezier_Curve: Calcul del punt de Bezier en coordenades 3D (CPunt3D) segons el 
-//             paràmetre i i els punts de control ctr 
+
 vec3 Punt_Bezier_Curve(float t, vec3* ctr)
 {
 
@@ -270,8 +281,7 @@ vec3 Punt_Bezier_Curve(float t, vec3* ctr)
 	return p;
 }
 
-// draw_Bezier_Curve_VAO: Càrrega dels punts de la corba de Bezier donada per nptsCorba punts de control definits en ctr_points, 
-//             amb increment pas, corba tancada o no i si volem visualtzar el Triedre de Frenet 
+
 vector<vec3> draw_Bezier_Curve_VAO(vector<vec3> ctr_points, int nptsCorba, float pas, bool tancat)
 {
 	GLuint vaoId = 0;
@@ -446,28 +456,56 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 	}
 }
 
+void incrementPlay() {
 
-void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, bool autoPlay, float& angle) {
+	while (s_autoPlay.load()) {
 
-	
+		s_globalI++;
+		this_thread::sleep_for(1s);
 
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && i < size - 1 && released)
-	{
-		released = false;
-		i++;
 	}
-	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && i > 0 && released)
+
+}
+
+
+void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, float& angle, bool& releasedAuto) {
+
+
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && s_globalI < size - 1 && released)
 	{
 		released = false;
-		i--;
+		s_globalI++;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && s_globalI > 0 && released)
+	{
+		released = false;
+		s_globalI--;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE && !released && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
 	{
 		punts = draw_Bezier_Curve_VAO(controlPoints, 4, 0.05, false);
-		translationIndex = 0;
 		released = true;
 	}
-
+	
+	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS && releasedAuto)
+	{
+		releasedAuto = false;
+		s_autoPlay.store(!s_autoPlay);
+		if (s_autoPlay)
+			worker = thread(incrementPlay);
+		else {
+			worker.detach();
+		}
+		
+		
+	}
+	else if (glfwGetKey(window, GLFW_KEY_K) == GLFW_RELEASE)
+	{
+		
+		releasedAuto = true;
+		
+	}
+	
 	float DEGTORAD = glm::radians(angle);
 	float r = sqrt(pow(og_lightPos.x, 2) + pow(og_lightPos.z, 2));
 	if (glfwGetKey(window, GLFW_KEY_Q))
@@ -491,3 +529,4 @@ void setOpenGLVersion() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 }
+
