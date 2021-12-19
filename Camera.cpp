@@ -147,21 +147,21 @@ void Camera::Inputs(GLFWwindow* window)
 
 void Camera::WhitePiecesCamera()
 {
-	Position = glm::vec3(-12.4933f, 12.0020f, 1.0377);
-	Orientation = glm::vec3(0.6499f, -0.7665f, -0.0088);
+	Position = glm::vec3(-14.5739f, 14.4547f, 18.2686f);
+	Orientation = glm::vec3(0.6197f, -0.79112f, -0.001f);
 	Up = glm::vec3(0.0000f, 1.0000f, 0.0000f);
 }
 
 void Camera::BlackPiecesCamera()
 {
-	Position = glm::vec3(12.9689f, 12.1829f, 1.2105f);
-	Orientation = glm::vec3(-0.6499f, -0.7665f, 0.0035f);
+	Position = glm::vec3(15.7998f, 10.9678f, 19.3397f);
+	Orientation = glm::vec3(-0.7300f, -0.6906f, 0.0045f);
 	Up = glm::vec3(0.0000f, 1.0000f, 0.0000f);
 }
 
 void Camera::CenitalCamera()
 {
-	Position = glm::vec3(3.6341f, 22.8766f, 1.2473f);
+	Position = glm::vec3(3.6341f, 22.8766f, 19.2473f);
 	Orientation = glm::vec3(-0.1339f, -0.9960f, -0.0002f);
 	Up = glm::vec3(0.0000f, 1.0000f, 0.0000f);
 }
