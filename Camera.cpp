@@ -70,8 +70,8 @@ void Camera::Inputs(GLFWwindow* window)
 	//Above board
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
 	{
-		Position = glm::vec3(3.6341f, 22.8766f, 19.2473f);
-		Orientation = glm::vec3(-0.1339f, -0.9960f, -0.0002f);
+		Position = glm::vec3(-5.34988737f, 24.6849060f, 20.1021519f);
+		Orientation = glm::vec3(0.178815141f, -0.9960f, -5.80324304e-05f);
 		Up = glm::vec3(0.0000f, 1.0000f, 0.0000f);
 	}
 	//White pieces view
@@ -161,8 +161,8 @@ void Camera::BlackPiecesCamera()
 
 void Camera::CenitalCamera()
 {
-	Position = glm::vec3(3.6341f, 22.8766f, 19.2473f);
-	Orientation = glm::vec3(-0.1339f, -0.9960f, -0.0002f);
+	Position = glm::vec3(-5.34988737f, 24.6849060f, 20.1021519f);
+	Orientation = glm::vec3(0.178815141f, -0.9960f, -5.80324304e-05f);
 	Up = glm::vec3(0.0000f, 1.0000f, 0.0000f);
 }
 

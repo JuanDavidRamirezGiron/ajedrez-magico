@@ -15,7 +15,7 @@
 using namespace glm;
 
 void setOpenGLVersion();
-void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, float& angle, bool& releasedAuto);
+void updateBoard(GLFWwindow* window, int& i, int size, bool& releasedLeft, bool& releasedRight, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, float& angle, bool& releasedAuto);
 void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model board, Model pawn_b, Model bishop_b, Model tower_b, Model horse_b, Model queen_b, Model king_b, Model pawn_w, Model bishop_w, Model tower_w, Model horse_w, Model queen_w, Model king_w, std::vector<std::vector<int>> arraygame, vector<vec3> controlPoints);
 
 vector<vec3> draw_Bezier_Curve_VAO(vector<vec3> ctr_points, int nptsCorba, float pas, bool tancat);
@@ -105,7 +105,7 @@ int main() {
 	
 	//Creamos los modelos y la camara
 	Skybox skybox(skyboxShader);
-	Camera camera(width, height, vec3(3.6341f, 22.8766f, 19.2473f), vec3(-0.1339f, -0.9960f, -0.0002f), vec3(0.0000f, 1.0000f, 0.0000f));
+	Camera camera(width, height, vec3(-5.34988737f, 24.6849060f, 20.1021519f), vec3(0.178815141f, -0.9960f, -5.80324304e-05f), vec3(0.0000f, 1.0000f, 0.0000f));
 	Model board("models/board_2.obj");
 	
 
@@ -135,7 +135,8 @@ int main() {
 	glUniform4f(glGetUniformLocation(shaderProgram.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
 	
 	//variables para cambio de jugada
-	bool released = true;
+	bool releasedLeft = true;
+	bool releasedRight = true;
 	bool releasedAuto = true;
 	int currentPlay = 0;
 	float angle = 180;
@@ -182,7 +183,7 @@ int main() {
 
 	while (!glfwWindowShouldClose(window)) {
 
-		updateBoard(window, currentPlay, allPlays.size(), released, controlPoints, og_lightPos, lightPos, angle, releasedAuto);
+		updateBoard(window, currentPlay, allPlays.size(), releasedLeft, releasedRight, controlPoints, og_lightPos, lightPos, angle, releasedAuto);
 
 		// Ajustamos color barrido
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
@@ -495,27 +496,41 @@ void incrementPlay() {
 }
 
 
-void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, float& angle, bool& releasedAuto) {
+void updateBoard(GLFWwindow* window, int& i, int size, bool& releasedLeft, bool& releasedRight, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, float& angle, bool& releasedAuto) {
 
+	vector<vec3> auxcontrolPoints = controlPoints;
 
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && s_globalI < size - 2 && released)
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && s_globalI < size - 2 && releasedRight)
 	{
-		released = false;
+		releasedRight = false;
 		s_globalI++;
 	}
-	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && s_globalI > 0 && released)
-	{
-		released = false;
-		s_globalI--;
-	}
-	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE && !released && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
+	else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE && !releasedRight)
 	{
 		if (s_globalI < s_globalNumPlays - 1)
 			punts = draw_Bezier_Curve_VAO(controlPoints, 4, 0.05, false);
 		translationIndex = 0;
 		anteriortranslationPiece = translationPiece;
-		released = true;
+		releasedRight = true;
 	}
+	
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && s_globalI > 0 && releasedLeft)
+	{
+		releasedLeft = false;
+		s_globalI--;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE && !releasedLeft)
+	{
+		if (s_globalI != 0)
+		{
+			std::reverse(controlPoints.begin(), controlPoints.end());
+			punts = draw_Bezier_Curve_VAO(controlPoints, 4, 0.05, false);
+		}
+		translationIndex = 0;
+		anteriortranslationPiece = translationPiece;
+		releasedLeft = true;
+	}
+	
 	
 	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS && releasedAuto)
 	{
