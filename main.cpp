@@ -26,6 +26,7 @@ void incrementPlay();
 static std::atomic<bool> s_autoPlay = false;
 static int s_globalI = 0;
 static thread worker;// = thread(incrementPlay);
+static vector<vec3> controlPoints;
 
 
 //piezas
@@ -65,7 +66,7 @@ int main() {
 	
 	vector<vector<vector<char>>> allBoardStatus;
 	vector<vector<vector<int>>> allPlays;
-	vector<vec3> controlPoints;
+	
 
 	Movements* reader1 = new Movements;
 	FENFileReader* reader = new FENFileReader("Jugadas.fen");
@@ -461,6 +462,8 @@ void incrementPlay() {
 	while (s_autoPlay.load()) {
 
 		s_globalI++;
+		punts = draw_Bezier_Curve_VAO(controlPoints, 4, 0.05, false);
+		translationIndex = 0;
 		this_thread::sleep_for(1s);
 
 	}
@@ -484,6 +487,7 @@ void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<ve
 	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE && !released && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
 	{
 		punts = draw_Bezier_Curve_VAO(controlPoints, 4, 0.05, false);
+		translationIndex = 0;
 		released = true;
 	}
 	
