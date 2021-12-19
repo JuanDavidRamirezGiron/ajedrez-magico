@@ -40,37 +40,48 @@ vector<glm::vec3> Movements::compareBoards(vector<vector<vector<char>>> allBoard
 	bool iguals = true;
 	bool iguals1 = true;
 	vector<vector<char>> matrizJugada = allBoardStatus[position];
-	vector<vector<char>> matrizFinal = allBoardStatus[position + 1];
+	vector<vector<char>> matrizFinal = allBoardStatus[position+1];
 	vector<glm::vec3> puntosControl;
 	int primerpieceX = 0;
 	int primerpieceZ = 0;
-	int segundopieceX = 0;
-	int segundopieceZ = 0;
+	float segundopieceX = 0;
+	float segundopieceZ = 0;
+	float copiasegundopieceX = 0;
+	float copiasegundopieceZ = 0;
 	int i = 0;
 	int j = 0;
-	while ((iguals || iguals1) && i < matrizJugada.size()) {
-		j = 0;
-		while ((iguals1 || iguals) && j < matrizJugada[i].size())
-		{
+
+	for (int i = 0; i < matrizJugada.size();i++ ) {
+
+		for (int j = 0; j < matrizJugada[i].size(); j++) {
+			
+			copiasegundopieceX = originX + (i + 1) * cellSize;
+			copiasegundopieceZ = originZ + (j + 1) * cellSize;
+
 			if (matrizJugada[i][j] != matrizFinal[i][j])
 			{
-				if (iguals) {
-					iguals = false;
-					segundopieceX = originX + (i + 1) * cellSize;
-					segundopieceZ = originZ + (j + 1) * cellSize;
+				if (iguals ) {
+					i = 0;
+						iguals = false;
+						segundopieceX = copiasegundopieceX;
+						segundopieceZ = copiasegundopieceZ;
+					
 				}
-				else{
-					iguals1 = false;
-					primerpieceX = originX + (i + 1) * cellSize;
-					primerpieceZ = originZ + (j + 1) * cellSize;
+				else {
+					if (primerpieceX != copiasegundopieceX && primerpieceZ != copiasegundopieceZ) {
+						iguals1 = false;
+						primerpieceX = copiasegundopieceX;
+						primerpieceZ = copiasegundopieceZ;
+					}
 				}
 			}
-			
-			j++;
+
 		}
-		i++;
 
 	}
+
+
+	
 	
 	if (position % 2 != 0)
 	{
