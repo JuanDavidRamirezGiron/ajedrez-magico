@@ -27,6 +27,7 @@ static std::atomic<bool> s_autoPlay = false;
 static int s_globalI = 0;
 static thread worker;// = thread(incrementPlay);
 static vector<vec3> controlPoints;
+static int s_globalNumPlays = 0;
 
 
 
@@ -71,11 +72,12 @@ int main() {
 	
 
 	Movements* reader1 = new Movements;
-	FENFileReader* reader = new FENFileReader("Jugadas.fen");
+	FENFileReader* reader = new FENFileReader("test.fen");
 	StatusToPlaysTransformer* transformer = new StatusToPlaysTransformer();
 	
 	allBoardStatus = reader->prepareBoard();
 	allPlays = transformer->transformStatusToPlays(allBoardStatus);
+	s_globalNumPlays = allPlays.size();
 
 	//reader->printAllBoardStatus(allBoardStatus);
 	
@@ -404,7 +406,7 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 			break;
 		}
 	}
-
+	/*
 	if (anteriortranslationPiece.size() != 0) {
 
 		vector<vec3> initial = { {0,0,0}, {0,0,0} };
@@ -462,13 +464,13 @@ void drawPieces(GLFWwindow* window, Shader shaderProgram, Camera camera, Model b
 		default:
 			break;
 		}
-	}
+	}*/
 	
 }
 
 void incrementPlay() {
 
-	while (s_autoPlay.load()) {
+	while (s_autoPlay.load() && s_globalI < s_globalNumPlays - 2) {
 
 		s_globalI++;
 		punts = draw_Bezier_Curve_VAO(controlPoints, 4, 0.05, false);
@@ -483,7 +485,7 @@ void incrementPlay() {
 void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<vec3> controlPoints, glm::vec3 og_lightPos, glm::vec3& lightPos, float& angle, bool& releasedAuto) {
 
 
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && s_globalI < size - 1 && released)
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && s_globalI < size - 2 && released)
 	{
 		released = false;
 		s_globalI++;
@@ -495,7 +497,8 @@ void updateBoard(GLFWwindow* window, int& i, int size, bool& released, vector<ve
 	}
 	else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE && !released && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
 	{
-		punts = draw_Bezier_Curve_VAO(controlPoints, 4, 0.05, false);
+		if (s_globalI < s_globalNumPlays - 1)
+			punts = draw_Bezier_Curve_VAO(controlPoints, 4, 0.05, false);
 		translationIndex = 0;
 		anteriortranslationPiece = translationPiece;
 		released = true;
