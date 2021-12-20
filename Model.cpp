@@ -1,3 +1,4 @@
+#pragma warning( disable : 4996)
 #include"Model.h"
 
 Model::Model(const char* filename){

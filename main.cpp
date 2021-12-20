@@ -62,7 +62,7 @@ vector<vec3> punts = { {0,0,0}, {0,0,0} };
 const unsigned int width = 1920; //1280
 const unsigned int height = 1080; //720
 
-int main() {
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 
 	SetConsoleOutputCP(CP_UTF8);
 	setvbuf(stdout, nullptr, _IOFBF, 1000);
