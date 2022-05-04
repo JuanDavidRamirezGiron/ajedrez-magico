@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1037525043507-oqe6ompb808a2255bl2eteqfv1dc266u.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1037525043507-oqe6ompb808a2255bl2eteqfv1dc266u</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAUBZxbRmXPbNCYVY1cyEwmWLRLRxiYlrI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1037525043507</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.appark</string>
+	<key>PROJECT_ID</key>
+	<string>appark-es</string>
+	<key>STORAGE_BUCKET</key>
+	<string>appark-es.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1037525043507:ios:bfe0bfb0b287c9cda1d646</string>
+</dict>
+</plist>
